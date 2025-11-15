@@ -10,6 +10,7 @@
   <ItemGroup>
     <Folder Include="Resource\Style\" />
     <Folder Include="Resource\Template\" />
+    <Folder Include="Service\LegacyService\" />
   </ItemGroup>
 
   <ItemGroup>

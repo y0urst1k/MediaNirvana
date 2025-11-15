@@ -2,16 +2,10 @@
 {
     public interface IService<T> where T : class, IEntity, new()
     {
-        IEnumerable<T> ServiceItems { get; }
-
-        Task<T> MakeItem(T entity);
-
-        Task UpdateItem(T entity);
-
-        Task DeleteItem(int id);
-
-        Task<IEnumerable<T>> GetItems();
-
-        Task<T> GetItem(int id);
+        Task<T?> GetItemAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<T>> GetItemsAsync(CancellationToken cancellationToken = default);
+        Task<T> CreateItemAsync(T item, CancellationToken cancellationToken = default);
+        Task<T> UpdateItemAsync(T item, CancellationToken cancellationToken = default);
+        Task<bool> DeleteItemAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }
