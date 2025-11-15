@@ -1,4 +1,7 @@
-﻿namespace Infrastructure.EF.Entity
+﻿using Infrastructure.EF.Entity.IndependentEntity;
+using Infrastructure.EF.Entity.IndependentEntity.DependentEntity;
+
+namespace Infrastructure.EF.Entity.ConnectingEntity
 {
     public class UserInteractionTag
     {

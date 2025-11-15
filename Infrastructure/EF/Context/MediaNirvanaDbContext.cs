@@ -1,5 +1,7 @@
 ﻿using Infrastructure.EF.Context.Config;
-using Infrastructure.EF.Entity;
+using Infrastructure.EF.Entity.ConnectingEntity;
+using Infrastructure.EF.Entity.IndependentEntity;
+using Infrastructure.EF.Entity.IndependentEntity.DependentEntity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.EF.Context

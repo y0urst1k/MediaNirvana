@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.EF.Entity
+﻿using Infrastructure.EF.Entity.ConnectingEntity;
+
+namespace Infrastructure.EF.Entity.IndependentEntity
 {
     public class Tag : Base.Entity
     {

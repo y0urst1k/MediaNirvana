@@ -1,6 +1,8 @@
-﻿using Infrastructure.EF.Enum;
+﻿using Infrastructure.EF.Entity.ConnectingEntity;
+using Infrastructure.EF.Entity.IndependentEntity.DependentEntity;
+using Infrastructure.EF.Enum;
 
-namespace Infrastructure.EF.Entity
+namespace Infrastructure.EF.Entity.IndependentEntity
 {
     public class MediaItem : Base.Entity
     {
@@ -14,8 +16,6 @@ namespace Infrastructure.EF.Entity
         public int? EpisodesCount { get; set; }
         public string? OfficialRating { get; set; }
         public string? Synopsis { get; set; }
-        public DateTimeOffset CreatedAt { get; set; }
-        public DateTimeOffset UpdatedAt { get; set; }
 
         // Навигационые свойства
         public List<MediaInstance> Instances { get; set; } = new();

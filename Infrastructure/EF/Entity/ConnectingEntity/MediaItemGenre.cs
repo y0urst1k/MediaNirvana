@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.EF.Entity
+﻿using Infrastructure.EF.Entity.IndependentEntity;
+
+namespace Infrastructure.EF.Entity.ConnectingEntity
 {
     public class MediaItemGenre : Base.Entity
     {

@@ -1,4 +1,4 @@
-﻿using Infrastructure.EF.Entity;
+﻿using Infrastructure.EF.Entity.ConnectingEntity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

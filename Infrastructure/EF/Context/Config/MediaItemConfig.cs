@@ -1,4 +1,4 @@
-﻿using Infrastructure.EF.Entity;
+﻿using Infrastructure.EF.Entity.IndependentEntity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,8 +15,6 @@ namespace Infrastructure.EF.Context.Config
             b.HasMany(x => x.MediaItemCreators).WithOne(mc => mc.MediaItem).HasForeignKey(mc => mc.MediaItemId).OnDelete(DeleteBehavior.Cascade);
             b.HasMany(x => x.RelationshipsSource).WithOne(r => r.SourceMedia).HasForeignKey(r => r.SourceMediaId).OnDelete(DeleteBehavior.Restrict);
             b.HasMany(x => x.RelationshipsTarget).WithOne(r => r.TargetMedia).HasForeignKey(r => r.TargetMediaId).OnDelete(DeleteBehavior.Restrict);
-            b.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-            b.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             b.HasIndex(x => x.Title);
             b.HasIndex(x => x.Year);
         }

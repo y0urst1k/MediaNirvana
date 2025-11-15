@@ -1,4 +1,4 @@
-﻿using Infrastructure.EF.Entity;
+﻿using Infrastructure.EF.Entity.IndependentEntity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,6 +11,7 @@ namespace Infrastructure.EF.Context.Config
             b.HasKey(x => x.Id);
             b.Property(x => x.Username).IsRequired().HasMaxLength(200);
             b.HasIndex(x => x.Username).IsUnique();
+            b.Property(x => x.Password).IsRequired().HasMaxLength(20);
             b.HasMany(x => x.Interactions).WithOne(i => i.User).HasForeignKey(i => i.UserId).OnDelete(DeleteBehavior.Cascade);
             b.HasMany(x => x.Labels).WithOne(l => l.User).HasForeignKey(l => l.UserId).OnDelete(DeleteBehavior.Cascade);
         }

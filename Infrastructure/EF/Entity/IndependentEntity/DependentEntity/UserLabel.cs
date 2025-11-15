@@ -1,6 +1,7 @@
-﻿using Infrastructure.EF.Enum;
+﻿using Infrastructure.EF.Entity.ConnectingEntity;
+using Infrastructure.EF.Enum;
 
-namespace Infrastructure.EF.Entity
+namespace Infrastructure.EF.Entity.IndependentEntity.DependentEntity
 {
     public class UserLabel : Base.Entity
     {

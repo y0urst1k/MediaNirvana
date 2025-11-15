@@ -1,6 +1,6 @@
 ﻿using Infrastructure.EF.Enum;
 
-namespace Infrastructure.EF.Entity
+namespace Infrastructure.EF.Entity.IndependentEntity.DependentEntity
 {
     public class MediaInstance : Base.Entity
     {
