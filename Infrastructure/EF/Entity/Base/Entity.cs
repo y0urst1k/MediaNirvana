@@ -4,6 +4,6 @@ namespace Infrastructure.EF.Entity.Base
 {
     public class Entity : IEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
     }
 }
