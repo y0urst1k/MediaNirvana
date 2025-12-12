@@ -1,0 +1,123 @@
+﻿<UserControl x:Class="MediaTracker.Views.ContentTrackerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:MediaTracker.Views"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1000">
+
+	<UserControl.Resources>
+		<!-- Стиль для кнопок-табов статуса (выглядят как Pill buttons) -->
+		<Style x:Key="StatusTabBtn" TargetType="RadioButton">
+			<Setter Property="Margin" Value="0,0,8,0"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="RadioButton">
+						<Border x:Name="Bd" CornerRadius="8" Padding="12,6" Background="Transparent" BorderBrush="#E5E7EB" BorderThickness="1">
+							<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						</Border>
+						<ControlTemplate.Triggers>
+							<Trigger Property="IsChecked" Value="True">
+								<Setter TargetName="Bd" Property="Background" Value="#111827"/>
+								<!-- Black -->
+								<Setter TargetName="Bd" Property="BorderBrush" Value="#111827"/>
+								<Setter Property="Foreground" Value="White"/>
+							</Trigger>
+							<Trigger Property="IsMouseOver" Value="True">
+								<Setter TargetName="Bd" Property="Background" Value="#F3F4F6"/>
+								<!-- Gray Hover -->
+							</Trigger>
+							<!-- Фикс: если выбран и наведен, оставляем черным -->
+							<MultiTrigger>
+								<MultiTrigger.Conditions>
+									<Condition Property="IsChecked" Value="True"/>
+									<Condition Property="IsMouseOver" Value="True"/>
+								</MultiTrigger.Conditions>
+								<Setter TargetName="Bd" Property="Background" Value="#374151"/>
+							</MultiTrigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</UserControl.Resources>
+
+	<!-- Основной контейнер -->
+	<Border Background="White" CornerRadius="16" Padding="24" Margin="20" Effect="{DynamicResource {x:Static SystemParameters.DropShadowKey}}">
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<!-- Header -->
+				<RowDefinition Height="Auto"/>
+				<!-- Filters Component -->
+				<RowDefinition Height="Auto"/>
+				<!-- Status Tabs -->
+				<RowDefinition Height="*"/>
+				<!-- Content List -->
+			</Grid.RowDefinitions>
+
+			<!-- ROW 0: HEADER -->
+			<DockPanel LastChildFill="False" Margin="0,0,0,24">
+				<StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+					<!-- Icon Filter -->
+					<Path Data="M3 6h18 M7 12h10 M10 18h4" Stroke="#6B7280" StrokeThickness="2" StrokeLineCap="Round" Width="20" Height="20" Margin="0,0,10,0" VerticalAlignment="Center"/>
+					<TextBlock Text="My Library" FontSize="24" FontWeight="Bold"/>
+				</StackPanel>
+
+				<Button DockPanel.Dock="Right" Click="OnAdd_Click" Background="#111827" Foreground="White" Padding="15,8" BorderThickness="0" Cursor="Hand">
+					<Button.Resources>
+						<Style TargetType="Border">
+							<Setter Property="CornerRadius" Value="6"/>
+						</Style>
+					</Button.Resources>
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="+" Margin="0,0,8,0" FontWeight="Bold"/>
+						<TextBlock Text="Add Media"/>
+					</StackPanel>
+				</Button>
+			</DockPanel>
+
+			<!-- ROW 1: SEARCH FILTERS (Наш новый компонент) -->
+			<!-- Связываем (Bind) свойства этого компонента с DependencyProperties текущего View -->
+			<local:SearchFilters
+                Grid.Row="1" Margin="0,0,0,20"
+                x:Name="FiltersControl"
+                SearchQuery="{Binding SearchText, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                SelectedType="{Binding SelectedType, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                SelectedYear="{Binding SelectedYear, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                SelectedTag="{Binding SelectedTag, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                AvailableTags="{Binding TagList, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ClearRequested="OnClearFilters"
+            />
+
+			<!-- ROW 2: STATUS TABS -->
+			<WrapPanel Grid.Row="2" Margin="0,0,0,24">
+				<RadioButton Content="All" GroupName="StatusGrp" IsChecked="True" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="All"/>
+				<RadioButton Content="Watching" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Watching"/>
+				<RadioButton Content="Reading" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Reading"/>
+				<RadioButton Content="Planned" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Planned"/>
+				<RadioButton Content="Completed" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Completed"/>
+				<RadioButton Content="Paused" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Paused"/>
+				<RadioButton Content="Abandoned" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Abandoned"/>
+			</WrapPanel>
+
+			<!-- ROW 0.5: STATS -->
+			<!-- не уверен в расположении этой фигни -->
+			<local:StatsOverview
+				Items="{Binding Items, RelativeSource={RelativeSource AncestorType=UserControl}}"
+				Margin="0,0,0,20"
+/>
+
+			<!-- ROW 3: LIST -->
+			<!-- Важно: ItemsSource привязан к FilteredView, а не к сырому Items -->
+			<local:ContentList
+                Grid.Row="3"
+                Items="{Binding FilteredView, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ItemDeleted="OnItemDeleted"
+                ItemViewDetail="OnItemDetail"
+            />
+		</Grid>
+	</Border>
+</UserControl>

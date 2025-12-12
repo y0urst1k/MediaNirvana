@@ -1,0 +1,189 @@
+﻿<Window x:Class="MediaTracker.Views.AddContentDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MediaTracker"
+        mc:Ignorable="d"
+        Title="Add Media" Height="650" Width="500"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="White">
+
+    <Window.Resources>
+        <!-- Общие стили для полей ввода -->
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="0,5,0,15"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#374151"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="0,5,0,15"/>
+            <Setter Property="Height" Value="30"/>
+        </Style>
+        <Style TargetType="DatePicker">
+            <Setter Property="Margin" Value="0,5,0,15"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Заголовок -->
+            <RowDefinition Height="*"/>
+            <!-- Вкладки -->
+            <RowDefinition Height="Auto"/>
+            <!-- Кнопки -->
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Add New Media" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
+
+        <TabControl Grid.Row="1" BorderThickness="0" Background="Transparent">
+            <!-- === TAB 1: BASIC === -->
+            <TabItem Header="Basic">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,10,0,0">
+                    <StackPanel>
+                        <Label Content="Title *"/>
+                        <TextBox x:Name="TitleInput" />
+
+                        <Label Content="Original Title"/>
+                        <TextBox x:Name="OriginalTitleInput"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <Label Content="Type *"/>
+                                <ComboBox x:Name="TypeInput" SelectionChanged="TypeInput_SelectionChanged">
+                                    <ComboBoxItem Content="Movie" IsSelected="True"/>
+                                    <ComboBoxItem Content="Book"/>
+                                    <ComboBoxItem Content="Show"/>
+                                    <ComboBoxItem Content="Game"/>
+                                    <ComboBoxItem Content="Music"/>
+                                    <ComboBoxItem Content="Other"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <Label Content="Year"/>
+                                <TextBox x:Name="YearInput" PreviewTextInput="NumberValidationTextBox"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Label Content="Country"/>
+                        <TextBox x:Name="CountryInput"/>
+
+                        <!-- Секция для Фильмов/Сериалов (Скрывается кодом) -->
+                        <StackPanel x:Name="VideoFields" Visibility="Visible">
+                            <Label Content="Duration (min)"/>
+                            <TextBox x:Name="DurationInput" PreviewTextInput="NumberValidationTextBox"/>
+                        </StackPanel>
+
+                        <!-- Секция только для Сериалов (Скрывается кодом) -->
+                        <StackPanel x:Name="ShowFields" Visibility="Collapsed">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Label Content="Seasons"/>
+                                    <TextBox x:Name="SeasonsInput" PreviewTextInput="NumberValidationTextBox"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <Label Content="Episodes"/>
+                                    <TextBox x:Name="EpisodesInput" PreviewTextInput="NumberValidationTextBox"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <Label Content="Official Rating"/>
+                        <TextBox x:Name="OfficialRatingInput" PlaceholderText="PG-13, 18+..."/>
+
+                        <Label Content="Synopsis"/>
+                        <TextBox x:Name="SynopsisInput" Height="60" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+
+                        <Label Content="Tags (comma separated)"/>
+                        <TextBox x:Name="TagsInput" PlaceholderText="Drama, Sci-Fi..."/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- === TAB 2: TRACKING === -->
+            <TabItem Header="Tracking">
+                <StackPanel Margin="0,10,0,0">
+                    <Label Content="Status *"/>
+                    <ComboBox x:Name="StatusInput">
+                        <ComboBoxItem Content="Planned" IsSelected="True"/>
+                        <ComboBoxItem Content="Watching"/>
+                        <ComboBoxItem Content="Reading"/>
+                        <ComboBoxItem Content="Completed"/>
+                        <ComboBoxItem Content="Paused"/>
+                        <ComboBoxItem Content="Abandoned"/>
+                    </ComboBox>
+
+                    <Label Content="Personal Rating (1-10)"/>
+                    <TextBox x:Name="RatingInput" PreviewTextInput="NumberValidationTextBox"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <Label Content="Start Date"/>
+                            <DatePicker x:Name="StartDateInput"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <Label Content="Completion Date"/>
+                            <DatePicker x:Name="CompletionDateInput"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Label Content="Personal Notes"/>
+                    <TextBox x:Name="NotesInput" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+                </StackPanel>
+            </TabItem>
+
+            <!-- === TAB 3: INVENTORY === -->
+            <TabItem Header="Inventory">
+                <StackPanel Margin="0,10,0,0">
+                    <CheckBox x:Name="PhysicalCopyCheck" Content="Has Physical Copy" Margin="0,0,0,10" Checked="Inventory_Checked" Unchecked="Inventory_Checked"/>
+                    <CheckBox x:Name="DigitalCopyCheck" Content="Has Digital Copy" Margin="0,0,0,20" Checked="Inventory_Checked" Unchecked="Inventory_Checked"/>
+
+                    <!-- Поля инвентаря (показываются, если есть галочки) -->
+                    <StackPanel x:Name="InventoryDetails" Visibility="Collapsed">
+                        <Label Content="Format"/>
+                        <TextBox x:Name="FormatInput" PlaceholderText="Blu-ray, Steam..."/>
+
+                        <Label Content="Source"/>
+                        <TextBox x:Name="SourceInput" PlaceholderText="Amazon, Store..."/>
+
+                        <Label Content="Location (Physical)"/>
+                        <TextBox x:Name="LocationInput" IsEnabled="{Binding IsChecked, ElementName=PhysicalCopyCheck}"/>
+
+                        <Label Content="Price"/>
+                        <TextBox x:Name="PriceInput" PreviewTextInput="NumberValidationTextBox"/>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
+        <!-- FOOTER BUTTONS -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Cancel" IsCancel="True" Padding="15,6" Margin="0,0,10,0" Click="Cancel_Click"/>
+            <Button Content="Add Media" IsDefault="True" Padding="15,6" Background="Black" Foreground="White" Click="Save_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

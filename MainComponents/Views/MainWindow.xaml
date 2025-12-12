@@ -1,0 +1,164 @@
+﻿<Window x:Class="MediaTracker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MediaTracker"
+        xmlns:views="clr-namespace:MediaTracker.Views"
+        mc:Ignorable="d"
+        Title="Media Tracker" Height="700" Width="1200"
+        Background="#F3F4F6" WindowStartupLocation="CenterScreen">
+
+	<Window.Resources>
+		<!-- Стили для кнопок (аналог Tailwind классов) -->
+		<Style x:Key="NavButton" TargetType="Button">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Foreground" Value="#D1D5DB"/>
+			<!-- Gray-300 -->
+			<Setter Property="FontSize" Value="16"/>
+			<Setter Property="Padding" Value="10"/>
+			<Setter Property="HorizontalContentAlignment" Value="Left"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="Button">
+						<Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+							<ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+						</Border>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+			<Style.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="Foreground" Value="White"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</Window.Resources>
+
+	<Grid>
+		<!-- ГЛАВНЫЙ КОНТЕЙНЕР (виден, когда залогинен) -->
+		<Grid x:Name="MainAppView" Visibility="Collapsed">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="260"/>
+				<!-- w-64 Sidebar -->
+				<ColumnDefinition Width="*"/>
+				<!-- flex-1 Main -->
+			</Grid.ColumnDefinitions>
+
+			<!-- === SIDEBAR === -->
+			<!-- Grid.Column="0" означает, что он займет левую колонку -->
+			<views:MediaSidebar
+				Grid.Column="0"
+				Items="{Binding Items}"
+				Username="{Binding CurrentUsername}"
+				Navigate="OnSidebarNavigate"
+				ItemClick="SidebarItem_Click"
+			/>
+
+			<!-- === MAIN CONTENT AREA === -->
+			<Border Grid.Column="1" Padding="40">
+				<Grid>
+					<!-- ЭКРАН 1: CONTENT TRACKER (Библиотека) -->
+					<Grid x:Name="LibraryScreen" Visibility="Visible">
+						<!-- 
+       Теперь вся логика фильтрации и отображения 
+       инкапсулирована в ContentTrackerView.
+       Мы просто передаем данные (Items) и слушаем события.
+    -->
+						<views:ContentTrackerView
+							Items="{Binding Items}"
+							AddRequested="ContentTracker_AddRequested"
+							ItemDeleted="Card_Delete"
+							ItemViewDetail="Card_ViewDetail"
+							Margin="0,0,0,20"
+    />
+					</Grid>
+
+					<Grid x:Name="ListsScreen" Visibility="Collapsed">
+						<views:ListsScreen
+							Lists="{Binding Lists}"
+							AllItems="{Binding Items}"
+    />
+					</Grid>
+
+					<!-- ЭКРАН 2: DETAIL VIEW (Детали) -->
+					<Grid x:Name="DetailScreen" Visibility="Collapsed" Background="#F3F4F6">
+						<StackPanel>
+							<Button Content="← Back to Library" Click="BackToLibrary_Click" Background="Transparent" BorderThickness="0" Foreground="#4B5563" HorizontalAlignment="Left" Margin="0,0,0,20" Cursor="Hand"/>
+
+							<Border Background="White" Padding="30" CornerRadius="12">
+								<StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+										<TextBlock Text="{Binding SelectedItem.Type}" Foreground="#2563EB" FontWeight="Bold"/>
+										<TextBlock Text=" • " Foreground="Gray"/>
+										<TextBlock Text="{Binding SelectedItem.Year}" Foreground="Gray"/>
+									</StackPanel>
+
+									<TextBlock Text="{Binding SelectedItem.Title}" FontSize="32" FontWeight="Bold" Margin="0,0,0,20"/>
+
+									<Grid Margin="0,0,0,20">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="*"/>
+											<ColumnDefinition Width="*"/>
+										</Grid.ColumnDefinitions>
+										<StackPanel Grid.Column="0">
+											<TextBlock Text="Status" Foreground="Gray" Margin="0,0,0,5"/>
+											<ComboBox SelectedItem="{Binding SelectedItem.Status}" ItemsSource="{Binding StatusOptions}" HorizontalAlignment="Left" Width="150"/>
+										</StackPanel>
+										<StackPanel Grid.Column="1">
+											<TextBlock Text="Your Rating" Foreground="Gray" Margin="0,0,0,5"/>
+											<TextBlock Text="{Binding SelectedItem.Rating, StringFormat='{}{0}/10'}" FontWeight="Bold"/>
+										</StackPanel>
+									</Grid>
+
+									<TextBlock Text="Notes" FontWeight="Bold" Margin="0,10,0,5"/>
+									<TextBox Text="{Binding SelectedItem.Notes, UpdateSourceTrigger=PropertyChanged}" Height="80" AcceptsReturn="True" Padding="5" BorderBrush="#E5E7EB"/>
+
+									<Button Content="Delete Item" Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" Padding="15,10" HorizontalAlignment="Right" Margin="0,20,0,0" Click="DeleteItem_Click">
+										<Button.Resources>
+											<Style TargetType="Border">
+												<Setter Property="CornerRadius" Value="6"/>
+											</Style>
+										</Button.Resources>
+									</Button>
+								</StackPanel>
+							</Border>
+						</StackPanel>
+					</Grid>
+
+					<!-- ЭКРАН 3: LISTS SCREEN (Списки) -->
+					<Grid x:Name="ListsScreen" Visibility="Collapsed">
+						<StackPanel>
+							<TextBlock Text="My Personal Lists" FontSize="28" FontWeight="Bold" Margin="0,0,0,20"/>
+							<ItemsControl ItemsSource="{Binding Lists}">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate>
+										<Border Background="White" Margin="0,0,0,15" Padding="20" CornerRadius="8">
+											<StackPanel>
+												<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="18"/>
+												<TextBlock Text="{Binding Description}" Foreground="Gray" Margin="0,5"/>
+												<TextBlock Text="{Binding Type, StringFormat='Type: {0}'}" FontSize="12" Foreground="#3B82F6"/>
+											</StackPanel>
+										</Border>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</StackPanel>
+					</Grid>
+
+				</Grid>
+			</Border>
+		</Grid>
+
+		<!-- ЭКРАН ЛОГИНА -->
+		<!-- ZIndex обеспечивает, что он будет поверх всего -->
+		<views:LoginScreen
+			x:Name="LoginView"
+			Visibility="Visible"
+			Grid.ColumnSpan="2"
+			LoginSuccess="OnLoginSuccess"
+		/>
+	</Grid>
+</Window>

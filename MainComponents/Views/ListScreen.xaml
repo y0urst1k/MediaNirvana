@@ -1,0 +1,99 @@
+﻿<UserControl x:Class="MediaTracker.Views.ListsScreen"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:MediaTracker.Views"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800">
+
+	<Grid Margin="20">
+		<!-- ГЛАВНЫЙ ВИД: СЕТКА СПИСКОВ -->
+		<Grid x:Name="ListsGrid" Visibility="Visible">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+
+			<DockPanel LastChildFill="False" Margin="0,0,0,20">
+				<StackPanel DockPanel.Dock="Left">
+					<TextBlock Text="Lists &amp; Collections" FontSize="24" FontWeight="Bold"/>
+					<TextBlock Text="Organize your content" Foreground="Gray"/>
+				</StackPanel>
+				<Button Content="+ Create List" Click="CreateList_Click" DockPanel.Dock="Right" Padding="10,5" Background="Black" Foreground="White"/>
+			</DockPanel>
+
+			<ScrollViewer Grid.Row="1">
+				<ItemsControl ItemsSource="{Binding Lists, RelativeSource={RelativeSource AncestorType=UserControl}}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<WrapPanel Orientation="Horizontal"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<Border Width="250" Height="150" Background="White" Margin="0,0,15,15" CornerRadius="8" Cursor="Hand" MouseLeftButtonUp="List_Click">
+								<Border.Effect>
+									<DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+								</Border.Effect>
+								<Grid Margin="15">
+									<StackPanel>
+										<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"/>
+										<TextBlock Text="{Binding Description}" Foreground="Gray" TextTrimming="CharacterEllipsis" MaxHeight="40" Margin="0,5"/>
+										<Border Background="#F3F4F6" HorizontalAlignment="Left" CornerRadius="4" Padding="6,2" Margin="0,10,0,0">
+											<TextBlock Text="{Binding Type}" FontSize="11"/>
+										</Border>
+									</StackPanel>
+
+									<!-- Кнопки действий (появляются снизу) -->
+									<StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+										<Button Content="✎" Click="EditList_Click" Background="Transparent" BorderThickness="0" Margin="0,0,5,0"/>
+										<Button Content="🗑" Click="DeleteList_Click" Background="Transparent" Foreground="Red" BorderThickness="0"/>
+									</StackPanel>
+								</Grid>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+		</Grid>
+
+		<!-- ДЕТАЛЬНЫЙ ВИД: СОДЕРЖИМОЕ СПИСКА -->
+		<Grid x:Name="ListDetail" Visibility="Collapsed" Background="White">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+
+			<Border BorderBrush="#E5E7EB" BorderThickness="0,0,0,1" Padding="0,0,0,15" Margin="0,0,0,15">
+				<DockPanel>
+					<StackPanel DockPanel.Dock="Left">
+						<Button Content="← Back to Lists" Click="CloseDetail_Click" Background="Transparent" BorderThickness="0" Foreground="Gray" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+						<TextBlock x:Name="DetailName" Text="List Name" FontSize="24" FontWeight="Bold"/>
+						<TextBlock x:Name="DetailDesc" Text="Description" Foreground="Gray"/>
+					</StackPanel>
+					<Button DockPanel.Dock="Right" Content="+ Manage Items" Click="ManageItems_Click" Padding="10,5" VerticalAlignment="Bottom"/>
+				</DockPanel>
+			</Border>
+
+			<ScrollViewer Grid.Row="1">
+				<ItemsControl x:Name="DetailItemsControl">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<!-- Используем ту же карточку, но в горизонтальном виде или упрощенную -->
+							<Border Margin="0,0,0,10" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="6">
+								<DockPanel>
+									<Button DockPanel.Dock="Right" Content="✕" Click="RemoveItemFromList_Click" Background="Transparent" BorderThickness="0" Foreground="Red"/>
+									<StackPanel>
+										<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+										<TextBlock Text="{Binding Type}" FontSize="12" Foreground="Gray"/>
+									</StackPanel>
+								</DockPanel>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+		</Grid>
+	</Grid>
+</UserControl>
