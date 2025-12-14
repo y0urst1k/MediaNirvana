@@ -1,16 +1,21 @@
-﻿<Window x:Class="MediaTracker.MainWindow"
+﻿<Window x:Class="MainComponents.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MediaTracker"
-        xmlns:views="clr-namespace:MediaTracker.Views"
+        xmlns:local="clr-namespace:MainComponents"
+        xmlns:views="clr-namespace:MainComponents.Views;assembly=MainComponents"
+        xmlns:prism="http://prismlibrary.com/"
+        xmlns:converters="clr-namespace:Infrastructure.Converter;assembly=Infrastructure"
+        prism:ViewModelLocator.AutoWireViewModel="True"
         mc:Ignorable="d"
-        Title="Media Tracker" Height="700" Width="1200"
+        Title="MediaNirvana" Height="700" Width="1200"
         Background="#F3F4F6" WindowStartupLocation="CenterScreen">
 
 	<Window.Resources>
-		<!-- Стили для кнопок (аналог Tailwind классов) -->
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <!-- Стили для кнопок (аналог Tailwind классов) -->
 		<Style x:Key="NavButton" TargetType="Button">
 			<Setter Property="Background" Value="Transparent"/>
 			<Setter Property="BorderThickness" Value="0"/>
@@ -39,7 +44,7 @@
 
 	<Grid>
 		<!-- ГЛАВНЫЙ КОНТЕЙНЕР (виден, когда залогинен) -->
-		<Grid x:Name="MainAppView" Visibility="Collapsed">
+        <Grid Visibility="{Binding IsMainAppVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="260"/>
 				<!-- w-64 Sidebar -->
@@ -51,27 +56,19 @@
 			<!-- Grid.Column="0" означает, что он займет левую колонку -->
 			<views:MediaSidebar
 				Grid.Column="0"
-				Items="{Binding Items}"
+				Items="{Binding MediaCollection}"
 				Username="{Binding CurrentUsername}"
-				Navigate="OnSidebarNavigate"
-				ItemClick="SidebarItem_Click"
+				DataContext="{Binding}"
 			/>
 
 			<!-- === MAIN CONTENT AREA === -->
 			<Border Grid.Column="1" Padding="40">
 				<Grid>
 					<!-- ЭКРАН 1: CONTENT TRACKER (Библиотека) -->
-					<Grid x:Name="LibraryScreen" Visibility="Visible">
-						<!-- 
-       Теперь вся логика фильтрации и отображения 
-       инкапсулирована в ContentTrackerView.
-       Мы просто передаем данные (Items) и слушаем события.
-    -->
+                    <Grid Visibility="{Binding ActiveScreen, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Library}">
+						<!-- Теперь вся логика фильтрации и отображения инкапсулирована в ContentTrackerView.Мы просто передаем данные (Items) и слушаем события.-->
 						<views:ContentTrackerView
-							Items="{Binding Items}"
-							AddRequested="ContentTracker_AddRequested"
-							ItemDeleted="Card_Delete"
-							ItemViewDetail="Card_ViewDetail"
+							Items="{Binding MediaCollection}"
 							Margin="0,0,0,20"
     />
 					</Grid>
@@ -79,14 +76,13 @@
 					<Grid x:Name="ListsScreen" Visibility="Collapsed">
 						<views:ListsScreen
 							Lists="{Binding Lists}"
-							AllItems="{Binding Items}"
-    />
+							AllItems="{Binding Items}"/>
 					</Grid>
 
 					<!-- ЭКРАН 2: DETAIL VIEW (Детали) -->
-					<Grid x:Name="DetailScreen" Visibility="Collapsed" Background="#F3F4F6">
+                    <Grid Visibility="{Binding ActiveScreen, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Detail}" Background="#F3F4F6">
 						<StackPanel>
-							<Button Content="← Back to Library" Click="BackToLibrary_Click" Background="Transparent" BorderThickness="0" Foreground="#4B5563" HorizontalAlignment="Left" Margin="0,0,0,20" Cursor="Hand"/>
+                            <Button Content="← Back to Library" Command="{Binding BackToLibraryCommand}" Background="Transparent" BorderThickness="0" Foreground="#4B5563" HorizontalAlignment="Left" Margin="0,0,0,20" Cursor="Hand"/>
 
 							<Border Background="White" Padding="30" CornerRadius="12">
 								<StackPanel>
@@ -116,7 +112,7 @@
 									<TextBlock Text="Notes" FontWeight="Bold" Margin="0,10,0,5"/>
 									<TextBox Text="{Binding SelectedItem.Notes, UpdateSourceTrigger=PropertyChanged}" Height="80" AcceptsReturn="True" Padding="5" BorderBrush="#E5E7EB"/>
 
-									<Button Content="Delete Item" Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" Padding="15,10" HorizontalAlignment="Right" Margin="0,20,0,0" Click="DeleteItem_Click">
+                                    <Button Content="Delete Item" Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" Padding="15,10" HorizontalAlignment="Right" Margin="0,20,0,0" Command="{Binding DeleteItemCommand}">
 										<Button.Resources>
 											<Style TargetType="Border">
 												<Setter Property="CornerRadius" Value="6"/>
@@ -129,7 +125,7 @@
 					</Grid>
 
 					<!-- ЭКРАН 3: LISTS SCREEN (Списки) -->
-					<Grid x:Name="ListsScreen" Visibility="Collapsed">
+                    <Grid Visibility="{Binding ActiveScreen, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Lists}">
 						<StackPanel>
 							<TextBlock Text="My Personal Lists" FontSize="28" FontWeight="Bold" Margin="0,0,0,20"/>
 							<ItemsControl ItemsSource="{Binding Lists}">
@@ -155,10 +151,9 @@
 		<!-- ЭКРАН ЛОГИНА -->
 		<!-- ZIndex обеспечивает, что он будет поверх всего -->
 		<views:LoginScreen
-			x:Name="LoginView"
-			Visibility="Visible"
+			Visibility="{Binding IsLoginVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
 			Grid.ColumnSpan="2"
-			LoginSuccess="OnLoginSuccess"
+			LoginSuccess="{Binding LoginSuccessCommand}"
 		/>
 	</Grid>
 </Window>

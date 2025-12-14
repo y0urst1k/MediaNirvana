@@ -2,12 +2,17 @@
 using System.Windows;
 using Infrastructure.DTO;
 using Infrastructure.EF.Enum;
+using Infrastructure.Interface;
+using Infrastructure.Service;
 using MainComponents.Events;
 
 namespace MainComponents.ViewModels
 {
     public class MainWindowViewModel : BindableBase
     {
+        private readonly ISessionService _sessionService;
+        private readonly MediaEditService _mediaEditService;
+        private readonly ContentTrackerViewModel _contentTrackerVm;
         private readonly IDialogService _dialogService;
         private readonly IEventAggregator _eventAggregator;
         // === Данные приложения ===
@@ -77,8 +82,10 @@ namespace MainComponents.ViewModels
         public DelegateCommand<MediaEditModel> AddMediaToListCommand { get; }
         public DelegateCommand<MediaEditModel> RemoveMediaFromListCommand { get; }
 
-        public MainWindowViewModel(IEventAggregator eventAggregator, IDialogService dialogService)
+        public MainWindowViewModel(ISessionService sessionService, MediaEditService mediaEditService, IEventAggregator eventAggregator, IDialogService dialogService, ContentTrackerViewModel contentTrackerVm)
         {
+            _sessionService = sessionService;
+            _mediaEditService = mediaEditService;
             _eventAggregator = eventAggregator;
             _dialogService = dialogService;
 
@@ -96,6 +103,8 @@ namespace MainComponents.ViewModels
 
             SubscribeToEvents();
 
+            _contentTrackerVm.SetSourceItems(MediaCollection);
+
             // Изначально показываем экран входа
             IsLoginVisible = true;
             IsMainAppVisible = false;
@@ -110,8 +119,9 @@ namespace MainComponents.ViewModels
             SwitchScreen("Library");
         }
 
-        private void OnDeleteMediaRequested(Guid mediaId)
+        private async Task OnDeleteMediaRequested(Guid mediaId)
         {
+            await _mediaEditService.DeleteAsync(mediaId, _sessionService.CurrentUser.Id);
             var item = MediaCollection.FirstOrDefault(i => i.Id == mediaId);
             if (item != null)
             {
@@ -123,8 +133,9 @@ namespace MainComponents.ViewModels
             }
         }
 
-        private void OnItemUpdated(MediaEditModel updatedItem)
+        private async Task OnItemUpdated(MediaEditModel updatedItem)
         {
+            await _mediaEditService.UpdateAsync(updatedItem.Id, _sessionService.CurrentUser.Id, updatedItem);
             var existing = MediaCollection.FirstOrDefault(i => i.Id == updatedItem.Id);
             if (existing != null)
             {
@@ -162,8 +173,8 @@ namespace MainComponents.ViewModels
         private void SubscribeToEvents()
         {
             _eventAggregator.GetEvent<LoginSuccessEvent>().Subscribe(OnLoginSuccess);
-            _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Subscribe(OnDeleteMediaRequested);
-            _eventAggregator.GetEvent<ItemUpdatedEvent>().Subscribe(OnItemUpdated);
+            _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Subscribe(async item => await OnDeleteMediaRequested(item));
+            _eventAggregator.GetEvent<ItemUpdatedEvent>().Subscribe(async item => await OnItemUpdated(item));
             _eventAggregator.GetEvent<ViewMediaDetailEvent>().Subscribe(OnViewMediaDetailRequested);
             _eventAggregator.GetEvent<AddMediaRequestedEvent>().Subscribe(OnAddMediaRequested);
         }
@@ -244,9 +255,11 @@ namespace MainComponents.ViewModels
                 var newItem = result.Parameters.GetValue<MediaEditModel>("result");
                 if (newItem != null)
                 {
+                    await _mediaEditService.CreateAsync(_sessionService.CurrentUser.Id, newItem);
                     MediaCollection.Insert(0, newItem);
                     SelectedItem = newItem;
                     SwitchScreen("Detail");
+                    _eventAggregator.GetEvent<MediaAddedEvent>().Publish(SelectedItem);
                 }
             }
         }

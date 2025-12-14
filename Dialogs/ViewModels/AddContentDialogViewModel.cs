@@ -140,7 +140,6 @@ namespace Dialogs.ViewModels
             // Если передали готовую Model — используем её, иначе создаём новую
             Model = parameters.GetValue<MediaEditModel>("model") ?? new MediaEditModel
             {
-                Id = Guid.NewGuid(),
                 StartDate = DateTimeOffset.Now
             };
 

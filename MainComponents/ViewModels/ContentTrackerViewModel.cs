@@ -93,22 +93,23 @@ namespace MainComponents.ViewModels
             TagList = new ObservableCollection<string>();
 
             _eventAggregator.GetEvent<MediaAddedEvent>().Subscribe(OnMediaAdded);
+            _eventAggregator.GetEvent<ItemUpdatedEvent>().Subscribe(OnItemUpdated);
+            _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Subscribe(OnDeleteRequested);
         }
 
         // === ИНИЦИАЛИЗАЦИЯ ===
-        public void Initialize()
+        // Привязка к внешней коллекции
+        public void SetSourceItems(ObservableCollection<MediaEditModel> items)
         {
-            if (Items == null) return;
-
-            // Создаём фильтрованный View
-            FilteredView = CollectionViewSource.GetDefaultView(Items);
-            FilteredView.Filter = FilterItem;
-
-            // Собираем теги
+            _items = items;
+            InitializeFilteredView();
             UpdateTagsList();
+        }
 
-            // Следим за изменениями в Items
-            Items.CollectionChanged += (s, e) => UpdateTagsList();
+        private void InitializeFilteredView()
+        {
+            FilteredView = CollectionViewSource.GetDefaultView(_items);
+            FilteredView.Filter = FilterItem;
         }
 
         // === ЛОГИКА ФИЛЬТРАЦИИ ===
@@ -117,40 +118,49 @@ namespace MainComponents.ViewModels
             if (obj is not MediaEditModel item) return false;
 
             // 1. Status
-            if (_statusFilter != "All" && item.Status.ToString() != _statusFilter) return false;
+            if (!string.Equals(_statusFilter, "All", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(item.Status.ToString(), _statusFilter, StringComparison.OrdinalIgnoreCase))
+                return false;
 
             // 2. Search Query
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 string query = SearchText.ToLower();
-                bool matchesTitle = item.Title?.ToLower().Contains(query) ?? false;
-                bool matchesOrig = item.OriginalTitle?.ToLower().Contains(query) ?? false;
-                bool matchesCountry = item.Country?.ToLower().Contains(query) ?? false;
-
-
-                if (!matchesTitle && !matchesOrig && !matchesCountry) return false;
+                if ((!item.Title?.ToLower().Contains(query) ?? true) &&
+                    (!item.OriginalTitle?.ToLower().Contains(query) ?? true) &&
+                    (!item.Country?.ToLower().Contains(query) ?? true))
+                    return false;
             }
 
             // 3. Type
-            if (!string.IsNullOrEmpty(SelectedType) && SelectedType != "All" && item.Type.ToString() != SelectedType) return false;
+            if (!string.IsNullOrEmpty(SelectedType) &&
+                !string.Equals(SelectedType, "All", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(item.Type.ToString(), SelectedType, StringComparison.OrdinalIgnoreCase))
+                return false;
 
             // 4. Year
-            if (!string.IsNullOrEmpty(SelectedYear) && SelectedYear != "All")
+            if (!string.IsNullOrEmpty(SelectedYear) &&
+                !string.Equals(SelectedYear, "All", StringComparison.OrdinalIgnoreCase))
             {
-                if (SelectedYear == "Older")
+                if (string.Equals(SelectedYear, "Older", StringComparison.OrdinalIgnoreCase))
                 {
                     if (item.Year >= 2020) return false;
                 }
                 else
                 {
-                    if (item.Year.ToString() != SelectedYear) return false;
+                    if (!string.Equals(item.Year.ToString(), SelectedYear, StringComparison.OrdinalIgnoreCase))
+                        return false;
                 }
             }
 
             // 5. Tag
-            if (!string.IsNullOrEmpty(SelectedTag) && SelectedTag != "All Tags")
+            if (!string.IsNullOrEmpty(SelectedTag) &&
+                !string.Equals(SelectedTag, "All Tags", StringComparison.OrdinalIgnoreCase))
             {
-                if (item.TagsInput == null || !item.TagsInput.Contains(SelectedTag)) return false;
+                if (string.IsNullOrWhiteSpace(item.TagsInput) ||
+                    !item.TagsInput.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                        .Contains(SelectedTag, StringComparer.OrdinalIgnoreCase))
+                    return false;
             }
 
             return true;
@@ -220,11 +230,19 @@ namespace MainComponents.ViewModels
 
         private void OnMediaAdded(MediaEditModel model)
         {
-            // Добавляем в коллекцию
-            Items.Add(model);
+            UpdateTagsList(); // Обновляем теги при добавлении
+            OnFilterChanged(); // Перефильтровываем
+        }
 
-            // Можно обновить фильтры/поиск
-            UpdateFilteredView();
+        private void OnItemUpdated(MediaEditModel updatedItem)
+        {
+            UpdateTagsList(); // Возможно, изменились теги
+            OnFilterChanged(); // Перефильтровываем
+        }
+
+        private void OnDeleteRequested(Guid mediaId)
+        {
+            OnFilterChanged(); // Обновляем отображение
         }
 
         private void UpdateFilteredView()

@@ -69,7 +69,7 @@
 					<TextBlock Text="My Library" FontSize="24" FontWeight="Bold"/>
 				</StackPanel>
 
-				<Button DockPanel.Dock="Right" Click="OnAdd_Click" Background="#111827" Foreground="White" Padding="15,8" BorderThickness="0" Cursor="Hand">
+                <Button DockPanel.Dock="Right" Command="{Binding AddCommand}" Background="#111827" Foreground="White" Padding="15,8" BorderThickness="0" Cursor="Hand">
 					<Button.Resources>
 						<Style TargetType="Border">
 							<Setter Property="CornerRadius" Value="6"/>
@@ -84,26 +84,31 @@
 
 			<!-- ROW 1: SEARCH FILTERS (Наш новый компонент) -->
 			<!-- Связываем (Bind) свойства этого компонента с DependencyProperties текущего View -->
-			<local:SearchFilters
+            <local:SearchFilters
                 Grid.Row="1" Margin="0,0,0,20"
-                x:Name="FiltersControl"
                 SearchQuery="{Binding SearchText, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 SelectedType="{Binding SelectedType, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 SelectedYear="{Binding SelectedYear, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 SelectedTag="{Binding SelectedTag, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 AvailableTags="{Binding TagList, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                ClearRequested="OnClearFilters"
-            />
+                ClearRequested="{Binding ClearFiltersCommand}"
+                />
 
-			<!-- ROW 2: STATUS TABS -->
+                <!-- ROW 2: STATUS TABS -->
 			<WrapPanel Grid.Row="2" Margin="0,0,0,24">
-				<RadioButton Content="All" GroupName="StatusGrp" IsChecked="True" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="All"/>
-				<RadioButton Content="Watching" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Watching"/>
-				<RadioButton Content="Reading" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Reading"/>
-				<RadioButton Content="Planned" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Planned"/>
-				<RadioButton Content="Completed" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Completed"/>
-				<RadioButton Content="Paused" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Paused"/>
-				<RadioButton Content="Abandoned" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Checked="OnStatusChanged" Tag="Abandoned"/>
+                <RadioButton Content="All" GroupName="StatusGrp" IsChecked="True" Style="{StaticResource StatusTabBtn}" Command="{Binding SetStatusFilterCommand}" CommandParameter="All"/>
+                <RadioButton Content="Watching" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Command="{Binding SetStatusFilterCommand}"
+                            CommandParameter="Watching"/>
+                <RadioButton Content="Reading" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Command="{Binding SetStatusFilterCommand}"
+                            CommandParameter="Reading"/>
+                <RadioButton Content="Planned" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Command="{Binding SetStatusFilterCommand}"
+                            CommandParameter="Planned"/>
+                <RadioButton Content="Completed" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Command="{Binding SetStatusFilterCommand}"
+                            CommandParameter="Completed"/>
+                <RadioButton Content="Paused" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Command="{Binding SetStatusFilterCommand}"
+                            CommandParameter="Paused"/>
+                <RadioButton Content="Abandoned" GroupName="StatusGrp" Style="{StaticResource StatusTabBtn}" Command="{Binding SetStatusFilterCommand}"
+                            CommandParameter="Abandoned"/>
 			</WrapPanel>
 
 			<!-- ROW 0.5: STATS -->
@@ -115,12 +120,10 @@
 
 			<!-- ROW 3: LIST -->
 			<!-- Важно: ItemsSource привязан к FilteredView, а не к сырому Items -->
-			<local:ContentList
+            <local:ContentList
                 Grid.Row="3"
-                Items="{Binding FilteredView, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                ItemDeleted="OnItemDeleted"
-                ItemViewDetail="OnItemDetail"
+                Items="{Binding FilteredView}" ItemDeleted="OnItemDeleted" ItemViewDetail="OnItemDetail"
             />
-		</Grid>
+        </Grid>
 	</Border>
 </UserControl>

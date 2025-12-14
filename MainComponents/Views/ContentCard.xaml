@@ -89,9 +89,9 @@
 
                 <!-- Action Buttons -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
-                    <Button Content="👁" Style="{StaticResource GhostBtn}" ToolTip="View Detail" Click="OnViewDetail_Click"/>
-                    <Button Content="✎" Style="{StaticResource GhostBtn}" ToolTip="Edit" Click="OnEdit_Click"/>
-                    <Button Content="🗑" Style="{StaticResource GhostBtn}" Foreground="#EF4444" ToolTip="Delete" Click="OnDelete_Click"/>
+                    <Button Content="👁" Style="{StaticResource GhostBtn}" ToolTip="View Detail" Command="{Binding ViewDetailCommand}"/>
+                    <Button Content="✎" Style="{StaticResource GhostBtn}" ToolTip="Edit" Command="{Binding EditCommand}"/>
+                    <Button Content="🗑" Style="{StaticResource GhostBtn}" Foreground="#EF4444" ToolTip="Delete" Command="{Binding DeleteCommand}"/>
                 </StackPanel>
             </Grid>
 

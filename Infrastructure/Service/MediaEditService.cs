@@ -269,5 +269,18 @@ namespace Infrastructure.Service
 
             await UpdateTagsForInteractionAsync(userInteraction.Id, tagNames, ct);
         }
+
+        public async Task<IEnumerable<MediaEditModel>> GetAllMediaItemsAsync(Guid userId, CancellationToken ct = default)
+        {
+            var allMediaItems = await _mediaItemService.GetItemsAsync(ct);
+            var result = new List<MediaEditModel>();
+
+            foreach (var mediaItem in allMediaItems)
+            {
+                var model = await GetEditModelAsync(mediaItem.Id, userId, ct);
+                result.Add(model);
+            }
+            return result;
+        }
     }
 }
