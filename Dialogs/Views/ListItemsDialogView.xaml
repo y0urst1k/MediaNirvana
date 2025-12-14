@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="MediaTracker.Views.ListItemsDialogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             xmlns:helpers ="clr-namespace:Infrastructure.Converter;assembly=Infrastructure"
+             Height="500" Width="400" Background="White">
+    
+    <UserControl.Resources>
+        <helpers:ZeroToVisibilityConverter x:Key="ZeroToVis"/>
+    </UserControl.Resources>
+	<Grid Margin="15">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<!-- Search -->
+		<TextBox Padding="5" Margin="0,0,0,10" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Tag="Search items..."/>
+		<TextBlock Text="Search items..." IsHitTestVisible="False" Foreground="Gray" Margin="8,5,0,0"
+                   Visibility="{Binding SearchQuery.Length, Converter={StaticResource ZeroToVis}}"/>
+
+		<!-- List with Checkboxes -->
+        <ListBox ItemsSource="{Binding Items}" Grid.Row="1" BorderThickness="1" BorderBrush="#E5E7EB" ScrollViewer.VerticalScrollBarVisibility="Auto">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+                    <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Content="{Binding Item.Title}" Margin="5"/>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+
+        <Button Grid.Row="2" Content="Done" Command="{Binding DoneCommand}" Margin="0,15,0,0" Padding="10" Background="Black" Foreground="White"/>
+	</Grid>
+</UserControl>

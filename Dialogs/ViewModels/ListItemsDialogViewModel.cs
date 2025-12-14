@@ -4,7 +4,7 @@ using Infrastructure.DTO;
 
 namespace Dialogs.ViewModels
 {
-    public class ListItemDialogViewModel : BindableBase, IDialogAware
+    public class ListItemsDialogViewModel : BindableBase, IDialogAware
     {
         private IEnumerable<MediaEditModel> _allItems;
         private List<Guid> _currentIds;
@@ -25,7 +25,7 @@ namespace Dialogs.ViewModels
 
 
         // Пустой конструктор — Prism создаст VM через контейнер
-        public ListItemDialogViewModel()
+        public ListItemsDialogViewModel()
         {
             DoneCommand = new DelegateCommand(OnDone);
             CancelCommand = new DelegateCommand(OnCancel);
@@ -63,10 +63,14 @@ namespace Dialogs.ViewModels
 
             var filtered = _allItems
                 .Where(item => item.Title.ToLower().Contains(_searchQuery.ToLower()))
-                .Select(item => new SelectableItem
+                .Select(item =>
                 {
-                    Item = item,
-                    IsSelected = Items.FirstOrDefault(s => s.Item.Id == item.Id)?.IsSelected ?? false
+                    var existing = Items.FirstOrDefault(s => s.Item.Id == item.Id);
+                    return new SelectableItem
+                    {
+                        Item = item,
+                        IsSelected = existing?.IsSelected ?? _currentIds.Contains(item.Id)
+                    };
                 });
 
             Items = new ObservableCollection<SelectableItem>(filtered);

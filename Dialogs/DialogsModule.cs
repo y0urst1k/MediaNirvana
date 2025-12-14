@@ -1,5 +1,6 @@
 using Dialogs.ViewModels;
 using Dialogs.Views;
+using MediaTracker.Views;
 
 namespace Dialogs
 {
@@ -7,12 +8,16 @@ namespace Dialogs
     {
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            throw new NotImplementedException();
+            
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterDialog<MessageBoxDialog, MessageBoxDialogViewModel>();
+            containerRegistry.RegisterDialog<MessageBoxDialogView, MessageBoxDialogViewModel>();
+            containerRegistry.RegisterDialog<AddContentDialogView, AddContentDialogViewModel>();
+            containerRegistry.RegisterDialog<EditContentDialogView, EditContentDialogViewModel>();
+            containerRegistry.RegisterDialog<ListEditorDialogView, ListEditorDialogViewModel>();
+            containerRegistry.RegisterDialog<ListItemsDialogView, ListItemsDialogViewModel>();
         }
     }
 }

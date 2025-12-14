@@ -1,9 +1,12 @@
-﻿<UserControl x:Class="MediaTracker.Views.AddContentDialog"
+﻿<UserControl x:Class="Dialogs.Views.AddContentDialogView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MediaTracker"
+        xmlns:local="clr-namespace:Dialogs"
+        xmlns:helper="clr-namespace:Infrastructure.AttachedProperties;assembly=Infrastructure"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
         mc:Ignorable="d"
         Height="650" Width="500"
         Background="White">
@@ -27,6 +30,7 @@
         <Style TargetType="DatePicker">
             <Setter Property="Margin" Value="0,5,0,15"/>
         </Style>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
 
     <Grid Margin="20">
@@ -47,10 +51,10 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,10,0,0">
                     <StackPanel>
                         <Label Content="Title *"/>
-                        <TextBox x:Name="TitleInput" />
+                        <TextBox Text="{Binding Model.Title, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="Original Title"/>
-                        <TextBox x:Name="OriginalTitleInput"/>
+                        <TextBox Text="{Binding Model.OriginalTitle, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -61,33 +65,28 @@
 
                             <StackPanel Grid.Column="0">
                                 <Label Content="Type *"/>
-                                <ComboBox x:Name="TypeInput" SelectionChanged="TypeInput_SelectionChanged">
-                                    <ComboBoxItem Content="Movie" IsSelected="True"/>
-                                    <ComboBoxItem Content="Book"/>
-                                    <ComboBoxItem Content="Show"/>
-                                    <ComboBoxItem Content="Game"/>
-                                    <ComboBoxItem Content="Music"/>
-                                    <ComboBoxItem Content="Other"/>
+                                <ComboBox ItemsSource="{Binding Model.AvailableTypes}" SelectedItem="{Binding Model.Type, UpdateSourceTrigger=PropertyChanged}">
+                                    
                                 </ComboBox>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
                                 <Label Content="Year"/>
-                                <TextBox x:Name="YearInput" PreviewTextInput="NumberValidationTextBox"/>
+                                <TextBox Text="{Binding Model.Year, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"/>
                             </StackPanel>
                         </Grid>
 
                         <Label Content="Country"/>
-                        <TextBox x:Name="CountryInput"/>
+                        <TextBox Text="{Binding Model.Country, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <!-- Секция для Фильмов/Сериалов (Скрывается кодом) -->
-                        <StackPanel x:Name="VideoFields" Visibility="Visible">
+                        <StackPanel x:Name="VideoFields" Visibility="{Binding ShowVideoFields, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Label Content="Duration (min)"/>
-                            <TextBox x:Name="DurationInput" PreviewTextInput="NumberValidationTextBox"/>
+                            <TextBox Text="{Binding Model.DurationMinutes, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
                         </StackPanel>
 
                         <!-- Секция только для Сериалов (Скрывается кодом) -->
-                        <StackPanel x:Name="ShowFields" Visibility="Collapsed">
+                        <StackPanel x:Name="ShowFields" Visibility="{Binding ShowShowFields, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -96,23 +95,23 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <Label Content="Seasons"/>
-                                    <TextBox x:Name="SeasonsInput" PreviewTextInput="NumberValidationTextBox"/>
+                                    <TextBox x:Name="SeasonsInput" Text="{Binding Model.SeasonsCount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <Label Content="Episodes"/>
-                                    <TextBox x:Name="EpisodesInput" PreviewTextInput="NumberValidationTextBox"/>
+                                    <TextBox x:Name="EpisodesInput" Text="{Binding Model.EpisodesCount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
 
                         <Label Content="Official Rating"/>
-                        <TextBox x:Name="OfficialRatingInput" PlaceholderText="PG-13, 18+..."/>
+                        <TextBox x:Name="OfficialRatingInput" Text="{Binding Model.OfficialRating, UpdateSourceTrigger=PropertyChanged}" helper:TextBoxHelper.Placeholder="PG-13, 18+..."/>
 
                         <Label Content="Synopsis"/>
-                        <TextBox x:Name="SynopsisInput" Height="60" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                        <TextBox x:Name="SynopsisInput" Text="{Binding Model.Synopsis, UpdateSourceTrigger=PropertyChanged}" Height="60" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
 
                         <Label Content="Tags (comma separated)"/>
-                        <TextBox x:Name="TagsInput" PlaceholderText="Drama, Sci-Fi..."/>
+                        <TextBox x:Name="TagsInput" Text="{Binding Model.TagsInput, UpdateSourceTrigger=PropertyChanged}" helper:TextBoxHelper.Placeholder="Drama, Sci-Fi..."/>
 
                     </StackPanel>
                 </ScrollViewer>
@@ -122,17 +121,12 @@
             <TabItem Header="Tracking">
                 <StackPanel Margin="0,10,0,0">
                     <Label Content="Status *"/>
-                    <ComboBox x:Name="StatusInput">
-                        <ComboBoxItem Content="Planned" IsSelected="True"/>
-                        <ComboBoxItem Content="Watching"/>
-                        <ComboBoxItem Content="Reading"/>
-                        <ComboBoxItem Content="Completed"/>
-                        <ComboBoxItem Content="Paused"/>
-                        <ComboBoxItem Content="Abandoned"/>
+                    <ComboBox x:Name="StatusInput" ItemsSource="{Binding Model.AvailableStatuses}" SelectedItem="{Binding Model.Status, UpdateSourceTrigger=PropertyChanged}">
+                        
                     </ComboBox>
 
                     <Label Content="Personal Rating (1-10)"/>
-                    <TextBox x:Name="RatingInput" PreviewTextInput="NumberValidationTextBox"/>
+                    <TextBox x:Name="RatingInput" Text="{Binding Model.PersonalRating, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -142,38 +136,38 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <Label Content="Start Date"/>
-                            <DatePicker x:Name="StartDateInput"/>
+                            <DatePicker x:Name="StartDateInput" SelectedDate="{Binding Model.StartDate, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <Label Content="Completion Date"/>
-                            <DatePicker x:Name="CompletionDateInput"/>
+                            <DatePicker x:Name="CompletionDateInput" SelectedDate="{Binding Model.CompletionDate, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                     </Grid>
 
                     <Label Content="Personal Notes"/>
-                    <TextBox x:Name="NotesInput" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+                    <TextBox x:Name="NotesInput" Text="{Binding Model.UserNotes, UpdateSourceTrigger=PropertyChanged}" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
                 </StackPanel>
             </TabItem>
 
             <!-- === TAB 3: INVENTORY === -->
             <TabItem Header="Inventory">
                 <StackPanel Margin="0,10,0,0">
-                    <CheckBox x:Name="PhysicalCopyCheck" Content="Has Physical Copy" Margin="0,0,0,10" Checked="Inventory_Checked" Unchecked="Inventory_Checked"/>
-                    <CheckBox x:Name="DigitalCopyCheck" Content="Has Digital Copy" Margin="0,0,0,20" Checked="Inventory_Checked" Unchecked="Inventory_Checked"/>
+                    <CheckBox x:Name="PhysicalCopyCheck" Content="Has Physical Copy" Margin="0,0,0,10" IsChecked="{Binding Model.HasPhysicalCopy, UpdateSourceTrigger=PropertyChanged}"/>
+                    <CheckBox x:Name="DigitalCopyCheck" Content="Has Digital Copy" Margin="0,0,0,20" IsChecked="{Binding Model.HasDigitalCopy, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <!-- Поля инвентаря (показываются, если есть галочки) -->
-                    <StackPanel x:Name="InventoryDetails" Visibility="Collapsed">
+                    <StackPanel x:Name="InventoryDetails" Visibility="{Binding ShowInventoryDetails, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Label Content="Format"/>
-                        <TextBox x:Name="FormatInput" PlaceholderText="Blu-ray, Steam..."/>
+                        <TextBox x:Name="FormatInput" Text="{Binding Model.Format, UpdateSourceTrigger=PropertyChanged}" helper:TextBoxHelper.Placeholder="Blu-ray, Steam..."/>
 
                         <Label Content="Source"/>
-                        <TextBox x:Name="SourceInput" PlaceholderText="Amazon, Store..."/>
+                        <TextBox x:Name="SourceInput" Text="{Binding Model.Source, UpdateSourceTrigger=PropertyChanged}" helper:TextBoxHelper.Placeholder="Amazon, Store..."/>
 
                         <Label Content="Location (Physical)"/>
-                        <TextBox x:Name="LocationInput" IsEnabled="{Binding IsChecked, ElementName=PhysicalCopyCheck}"/>
+                        <TextBox x:Name="LocationInput" Text="{Binding Model.Location, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Model.HasPhysicalCopy}"/>
 
                         <Label Content="Price"/>
-                        <TextBox x:Name="PriceInput" PreviewTextInput="NumberValidationTextBox"/>
+                        <TextBox x:Name="PriceInput" Text="{Binding Model.Price, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
                     </StackPanel>
                 </StackPanel>
             </TabItem>
@@ -181,8 +175,8 @@
 
         <!-- FOOTER BUTTONS -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="Cancel" IsCancel="True" Padding="15,6" Margin="0,0,10,0" Click="Cancel_Click"/>
-            <Button Content="Add Media" IsDefault="True" Padding="15,6" Background="Black" Foreground="White" Click="Save_Click"/>
+            <Button Content="Cancel" IsCancel="True" Padding="15,6" Margin="0,0,10,0" Command="{Binding CancelCommand}"/>
+            <Button Content="Add Media" IsDefault="True" Padding="15,6" Background="Black" Foreground="White" Command="{Binding SaveCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

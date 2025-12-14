@@ -18,8 +18,6 @@ namespace Dialogs.ViewModels
 
         public DialogCloseListener RequestClose { get; set; }
 
-        public string Title => List.Id == null ? "New List" : "Edit List";
-
         public ListEditorDialogViewModel()
         {
             List = new PersonalListEditModel();

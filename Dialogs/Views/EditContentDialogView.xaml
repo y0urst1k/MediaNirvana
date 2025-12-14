@@ -1,12 +1,14 @@
-﻿<UserControl x:Class="Dialogs.Views.EditContentDialog"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:helper="clr-namespace:Infrastructure.AttachedProperties;assembly=Infrastructure"
-        mc:Ignorable="d"
-        Height="650" Width="500"
-        Background="White">
+﻿<UserControl x:Class="Dialogs.Views.EditContentDialogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:helper="clr-namespace:Infrastructure.AttachedProperties;assembly=Infrastructure"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d"
+             Height="650" Width="500"
+             Background="White">
 
     <UserControl.Resources>
         <!-- Стили для полей (как в AddDialog) -->
@@ -35,7 +37,8 @@
 			<Setter Property="Padding" Value="8"/>
 			<Setter Property="Height" Value="35"/>
 		</Style>
-	</UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
 
 	<Grid Margin="20">
 		<Grid.RowDefinitions>
@@ -54,11 +57,11 @@
 
 				<!-- Title -->
 				<Label Content="Title *"/>
-				<TextBox x:Name="TitleInput"/>
+                <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
 
 				<!-- Original Title -->
 				<Label Content="Original Title"/>
-				<TextBox x:Name="OriginalTitleInput"/>
+                <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
 
 				<!-- Row: Type & Status -->
 				<Grid>
@@ -70,26 +73,16 @@
 
 					<StackPanel Grid.Column="0">
 						<Label Content="Type *"/>
-						<ComboBox x:Name="TypeInput" SelectionChanged="TypeInput_SelectionChanged">
-							<ComboBoxItem Content="Movie"/>
-							<ComboBoxItem Content="Book"/>
-							<ComboBoxItem Content="Show"/>
-							<ComboBoxItem Content="Game"/>
-							<ComboBoxItem Content="Music"/>
-							<ComboBoxItem Content="Other"/>
-						</ComboBox>
+                        <ComboBox ItemsSource="{Binding TypeOptions}"
+                                  SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}">
+                        </ComboBox>
 					</StackPanel>
 
 					<StackPanel Grid.Column="2">
 						<Label Content="Status *"/>
-						<ComboBox x:Name="StatusInput">
-							<ComboBoxItem Content="Planned"/>
-							<ComboBoxItem Content="Watching"/>
-							<ComboBoxItem Content="Reading"/>
-							<ComboBoxItem Content="Completed"/>
-							<ComboBoxItem Content="Paused"/>
-							<ComboBoxItem Content="Abandoned"/>
-						</ComboBox>
+                        <ComboBox ItemsSource="{Binding StatusOptions}"
+                                  SelectedItem="{Binding Status, UpdateSourceTrigger=PropertyChanged}">
+                        </ComboBox>
 					</StackPanel>
 				</Grid>
 
@@ -102,16 +95,16 @@
 					</Grid.ColumnDefinitions>
 					<StackPanel Grid.Column="0">
 						<Label Content="Year"/>
-						<TextBox x:Name="YearInput" PreviewTextInput="NumberValidationTextBox"/>
+                        <TextBox Text="{Binding Year, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
 					</StackPanel>
 					<StackPanel Grid.Column="2">
 						<Label Content="Country"/>
-						<TextBox x:Name="CountryInput"/>
+                        <TextBox Text="{Binding Country, UpdateSourceTrigger=PropertyChanged}"/>
 					</StackPanel>
 				</Grid>
 
 				<!-- Conditional: Video Fields -->
-				<StackPanel x:Name="VideoFields" Visibility="Visible">
+                <StackPanel x:Name="VideoFields" Visibility="{Binding IsVideoFieldsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
 					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*"/>
@@ -123,51 +116,51 @@
 
 						<StackPanel Grid.Column="0">
 							<Label Content="Duration (min)"/>
-							<TextBox x:Name="DurationInput" PreviewTextInput="NumberValidationTextBox"/>
+                            <TextBox Text="{Binding DurationMinutes, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
 						</StackPanel>
 
 						<!-- Show Fields (Nested in grid) -->
-						<StackPanel x:Name="ShowSeasonsField" Grid.Column="2" Visibility="Collapsed">
+                        <StackPanel x:Name="ShowSeasonsField" Grid.Column="2" Visibility="{Binding IsShowFieldsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
 							<Label Content="Seasons"/>
-							<TextBox x:Name="SeasonsInput" PreviewTextInput="NumberValidationTextBox"/>
+                            <TextBox Text="{Binding SeasonsCount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
 						</StackPanel>
 
-						<StackPanel x:Name="ShowEpisodesField" Grid.Column="4" Visibility="Collapsed">
+                        <StackPanel Grid.Column="4" Visibility="{Binding IsShowFieldsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
 							<Label Content="Episodes"/>
-							<TextBox x:Name="EpisodesInput" PreviewTextInput="NumberValidationTextBox"/>
+                            <TextBox Text="{Binding EpisodesCount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" PreviewTextInput="NumberValidationTextBox"/>
 						</StackPanel>
 					</Grid>
 				</StackPanel>
 
 				<!-- Official Rating -->
 				<Label Content="Official Rating"/>
-				<TextBox x:Name="OfficialRatingInput"/>
+                <TextBox Text="{Binding OfficialRating, UpdateSourceTrigger=PropertyChanged}"/>
 
 				<!-- Synopsis -->
 				<Label Content="Synopsis"/>
-				<TextBox x:Name="SynopsisInput" Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                <TextBox Text="{Binding Synopsis, UpdateSourceTrigger=PropertyChanged}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
 
 				<!-- Tags -->
 				<Label Content="Tags (comma separated)"/>
-				<TextBox x:Name="TagsInput" helper:TextBoxHelper.Placeholder="Drama, Action..."/>
+                <TextBox Text="{Binding TagsInput, UpdateSourceTrigger=PropertyChanged}" helper:TextBoxHelper.Placeholder="Drama, Action..."/>
 
 				<!-- Notes -->
 				<Label Content="Personal Notes"/>
-				<TextBox x:Name="NotesInput" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+                <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
 
 			</StackPanel>
 		</ScrollViewer>
 
 		<!-- Footer Buttons -->
 		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-			<Button Content="Cancel" IsCancel="True" Padding="16,8" Background="Transparent" BorderThickness="1" BorderBrush="#D1D5DB" Margin="0,0,10,0" Click="Cancel_Click">
+            <Button Content="Cancel" IsCancel="True" Padding="16,8" Background="Transparent" BorderThickness="1" BorderBrush="#D1D5DB" Margin="0,0,10,0" Command="{Binding CancelCommand}">
 				<Button.Resources>
 					<Style TargetType="Border">
 						<Setter Property="CornerRadius" Value="6"/>
 					</Style>
 				</Button.Resources>
 			</Button>
-			<Button Content="Save Changes" IsDefault="True" Padding="16,8" Background="#111827" Foreground="White" Click="Save_Click">
+            <Button Content="Save Changes" IsDefault="True" Padding="16,8" Background="#111827" Foreground="White" Command="{Binding SaveCommand}">
 				<Button.Resources>
 					<Style TargetType="Border">
 						<Setter Property="CornerRadius" Value="6"/>

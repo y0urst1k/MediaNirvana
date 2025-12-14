@@ -92,7 +92,7 @@ namespace Dialogs.ViewModels
 
         private bool CanSave()
         {
-            return !string.IsNullOrWhiteSpace(Model.Title);
+            return !string.IsNullOrWhiteSpace(Model.Title) && !string.IsNullOrWhiteSpace(Model.Type.ToString()); ;
         }
 
         private async void OnSave()

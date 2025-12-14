@@ -90,18 +90,24 @@ namespace Dialogs.ViewModels
                 return;
             }
 
+            int.TryParse(Year?.ToString(), out int year);
+            int.TryParse(DurationMinutes?.ToString(), out int duration);
+            int.TryParse(SeasonsCount?.ToString(), out int seasonsCount);
+            int.TryParse(EpisodesCount?.ToString(), out int episodesCount);
+
             // Создаём обновлённый объект
             _editedItem = new MediaEditModel
             {
+                Id = _originalItem.Id,
                 Title = Title,
                 OriginalTitle = OriginalTitle,
-                Year = Year,
+                Year = year > 0 ? (int?)year : null,
                 Country = Country,
                 Type = Type,
-                DurationMinutes = DurationMinutes,
+                DurationMinutes = duration > 0 ? (int?)duration : null,
                 Status = Status,
-                SeasonsCount = SeasonsCount,
-                EpisodesCount = EpisodesCount,
+                SeasonsCount = seasonsCount > 0 ? (int?)seasonsCount : null,
+                EpisodesCount = episodesCount > 0 ? (int?)episodesCount : null,
                 OfficialRating = OfficialRating,
                 Synopsis = Synopsis,
                 UserNotes = Notes,

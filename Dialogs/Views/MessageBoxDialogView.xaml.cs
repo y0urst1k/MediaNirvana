@@ -6,9 +6,9 @@ namespace Dialogs.Views
     /// <summary>
     /// Логика взаимодействия для MessageBoxDialog.xaml
     /// </summary>
-    public partial class MessageBoxDialog : UserControl
+    public partial class MessageBoxDialogView : UserControl
     {
-        public MessageBoxDialog()
+        public MessageBoxDialogView()
         {
             InitializeComponent();
         }
