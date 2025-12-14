@@ -1,8 +1,8 @@
-﻿<Window x:Class="MediaTracker.Views.ListEditorDialog"
+﻿<UserControl x:Class="MediaTracker.Views.ListEditorDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="List Editor" Height="350" Width="400"
-        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Background="White">
+        Height="350" Width="400"
+        Background="White">
 	<StackPanel Margin="20">
 		<TextBlock Text="Manage List" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
 
@@ -24,4 +24,4 @@
 			<Button Content="Save" IsDefault="True" Padding="15,6" Background="Black" Foreground="White" Click="Save_Click"/>
 		</StackPanel>
 	</StackPanel>
-</Window>
+</UserControl>

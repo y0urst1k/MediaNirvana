@@ -1,21 +1,22 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace MediaTracker.Views
+namespace MainComponents.Views
 {
-    public static readonly DependencyProperty ItemsProperty =
-    DependencyProperty.Register("Items", typeof(System.Collections.IEnumerable), typeof(ContentList));
-
-    public System.Collections.IEnumerable Items
+    public partial class ContentList : UserControl
     {
-        get { return (System.Collections.IEnumerable)GetValue(ItemsProperty); }
-        set { SetValue(ItemsProperty, value); }
-    }
-
-    // === События для родителя (MainView) ===
-    // Это аналог props.onDelete, props.onViewDetail
-    public event ContentCard.CardActionHandler ItemDeleted;
+        public static readonly DependencyProperty ItemsProperty =
+            DependencyProperty.Register("Items", typeof(System.Collections.IEnumerable), typeof(ContentList));
+        
+        public System.Collections.IEnumerable Items
+        {
+            get { return (System.Collections.IEnumerable)GetValue(ItemsProperty); }
+            set { SetValue(ItemsProperty, value); }
+        }
+        
+        // === События для родителя (MainView) ===
+        // Это аналог props.onDelete, props.onViewDetail
+        public event ContentCard.CardActionHandler ItemDeleted;
         public event ContentCard.CardActionHandler ItemViewDetail;
         public event ContentCard.CardActionHandler ItemEdited;
 

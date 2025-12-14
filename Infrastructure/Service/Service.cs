@@ -1,5 +1,8 @@
-﻿using Infrastructure.EF.Entity.Base;
+﻿using System.Linq;
+using System.Linq.Expressions;
+using Infrastructure.EF.Entity.Base;
 using Infrastructure.Interface;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Service
@@ -63,9 +66,11 @@ namespace Infrastructure.Service
             return await _repo.GetEntityAsync(id, cancellationToken).ConfigureAwait(false);
         }
 
-        public virtual async Task<IEnumerable<T>> GetItemsAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<IEnumerable<T>> GetItemsAsync(CancellationToken cancellationToken = default, Expression<Func<T, bool>>? filter = null)
         {
-            return await _repo.GetAllEntitiesAsync(null, cancellationToken).ConfigureAwait(false);
+            var query = _repo.Query();
+            if (filter != null) query = query.Where(filter);
+            return await query.ToListAsync(cancellationToken);
         }
 
         public async Task<T> UpdateItemAsync(T item, CancellationToken cancellationToken = default)
@@ -88,6 +93,22 @@ namespace Infrastructure.Service
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка изменения сущности с Id = {Id}", item.Id);
+                throw;
+            }
+        }
+
+        public async Task UpdateWithTransactionAsync(T item, Func<Task> additionalOperations, CancellationToken ct = default)
+        {
+            using var transaction = await _repo.DbContext.Database.BeginTransactionAsync(ct);
+            try
+            {
+                await UpdateItemAsync(item, ct);
+                await additionalOperations();
+                await transaction.CommitAsync(ct);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(ct);
                 throw;
             }
         }

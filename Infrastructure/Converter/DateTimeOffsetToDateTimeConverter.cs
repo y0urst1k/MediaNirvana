@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
 
-namespace Infrastructure.Resource.Converter
+namespace Infrastructure.Converter
 {
     public class DateTimeOffsetToDateTimeConverter : IValueConverter
     {

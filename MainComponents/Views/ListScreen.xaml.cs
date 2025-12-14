@@ -1,10 +1,9 @@
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace MediaTracker.Views
+namespace MainComponents.Views
 {
     public partial class ListsScreen : UserControl
     {

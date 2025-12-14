@@ -41,7 +41,7 @@ namespace Infrastructure.Repository
             return await q.FirstOrDefaultAsync(e => e.Id == id, ct).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<T>> GetAllEntitiesAsync(Func<IQueryable<T>, IQueryable<T>>? modifier = null, CancellationToken ct = default)
+        public async Task<IEnumerable<T>> GetAllEntitiesAsync(CancellationToken ct = default, Func<IQueryable<T>, IQueryable<T>>? modifier = null)
         {
             IQueryable<T> q = BuildQuery(true, null);
             if (modifier != null) 
@@ -60,19 +60,10 @@ namespace Infrastructure.Repository
 
         public virtual async Task UpdateEntityAsync(T entity, CancellationToken ct = default)
         {
-            if (entity == null) 
-                throw new ArgumentNullException(nameof(entity));
-            var tracked = _db.ChangeTracker.Entries<T>().FirstOrDefault(e => e.Entity.Id == entity.Id);
-            if (tracked == null)
-            {
-                _set.Attach(entity);
-                _db.Entry(entity).State = EntityState.Modified;
-            }
-            else
-            {
-                tracked.CurrentValues.SetValues(entity);
-            }
-            await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+
+            _set.Update(entity);
+            await _db.SaveChangesAsync(ct);
         }
 
         public virtual async Task DeleteEntityAsync(Guid id, CancellationToken ct = default)
@@ -85,5 +76,12 @@ namespace Infrastructure.Repository
             _set.Remove(entity);
             await _db.SaveChangesAsync(ct).ConfigureAwait(false);
         }
+
+        public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
+        {
+            return await _set.AnyAsync(e => e.Id == id, ct);
+        }
+
+        public MediaNirvanaDbContext DbContext => _db;
     }
 }

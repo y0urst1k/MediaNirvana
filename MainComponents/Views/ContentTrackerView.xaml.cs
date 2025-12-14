@@ -1,62 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using MediaTracker; 
+using System.Windows.Data; 
 
-
-
-namespace="" MediaTracker.Views
+namespace MainComponents.Views
 {
-public partial class ContentTrackerView : UserControl, INotifyPropertyChanged
-{
-// === 1. Входные данные (Items) ===
-public static readonly DependencyProperty ItemsProperty =
-DependencyProperty.Register("Items", typeof(ObservableCollection<ContentItem>
-	), typeof(ContentTrackerView),
-	new PropertyMetadata(null, OnItemsChanged));
-
-	public ObservableCollection<ContentItem>
-		Items
-		{
-		get { return (ObservableCollection<ContentItem>
-			)GetValue(ItemsProperty); }
+    public partial class ContentTrackerView : UserControl, INotifyPropertyChanged
+    {
+        // === 1. Входные данные (Items) ===
+        public static readonly DependencyProperty ItemsProperty =
+            DependencyProperty.Register("Items", typeof(ObservableCollection<ContentItem>), typeof(ContentTrackerView),
+                new PropertyMetadata(null, OnItemsChanged));
+        public ObservableCollection<ContentItem> Items
+        {
+            get { return (ObservableCollection<ContentItem>)GetValue(ItemsProperty); }
 			set { SetValue(ItemsProperty, value); }
-			}
-
-			// === 2. Свойства фильтров (связаны с SearchFilters) ===
-
-			// SearchText
-			public static readonly DependencyProperty SearchTextProperty =
-			DependencyProperty.Register("SearchText", typeof(string), typeof(ContentTrackerView),
-			new PropertyMetadata("", OnFilterPropChanged));
-			public string SearchText { get => (string)GetValue(SearchTextProperty); set => SetValue(SearchTextProperty, value); }
-
-			// SelectedType
-			public static readonly DependencyProperty SelectedTypeProperty =
-			DependencyProperty.Register("SelectedType", typeof(string), typeof(ContentTrackerView),
-			new PropertyMetadata("All", OnFilterPropChanged));
-			public string SelectedType { get => (string)GetValue(SelectedTypeProperty); set => SetValue(SelectedTypeProperty, value); }
-
-			// SelectedYear
-			public static readonly DependencyProperty SelectedYearProperty =
-			DependencyProperty.Register("SelectedYear", typeof(string), typeof(ContentTrackerView),
-			new PropertyMetadata("All", OnFilterPropChanged));
-			public string SelectedYear { get => (string)GetValue(SelectedYearProperty); set => SetValue(SelectedYearProperty, value); }
-
-			// SelectedTag
-			public static readonly DependencyProperty SelectedTagProperty =
-			DependencyProperty.Register("SelectedTag", typeof(string), typeof(ContentTrackerView),
-			new PropertyMetadata("All Tags", OnFilterPropChanged)); // Дефолт должен совпадать с SearchFilters
-			public string SelectedTag { get => (string)GetValue(SelectedTagProperty); set => SetValue(SelectedTagProperty, value); }
-
-			// Список доступных тегов (вычисляется автоматически)
-			public ObservableCollection<string>
-				TagList { get; set; } = new ObservableCollection<string>();
+        }
+        // === 2. Свойства фильтров (связаны с SearchFilters) ===
+        // SearchText
+        public static readonly DependencyProperty SearchTextProperty =
+            DependencyProperty.Register("SearchText", typeof(string), typeof(ContentTrackerView),
+                new PropertyMetadata("", OnFilterPropChanged));
+        public string SearchText { get => (string)GetValue(SearchTextProperty); set => SetValue(SearchTextProperty, value); }
+        
+        // SelectedType
+        public static readonly DependencyProperty SelectedTypeProperty =
+            DependencyProperty.Register("SelectedType", typeof(string), typeof(ContentTrackerView),
+                new PropertyMetadata("All", OnFilterPropChanged));
+        public string SelectedType { get => (string)GetValue(SelectedTypeProperty); set => SetValue(SelectedTypeProperty, value); }
+        
+        // SelectedYear
+        public static readonly DependencyProperty SelectedYearProperty =
+            DependencyProperty.Register("SelectedYear", typeof(string), typeof(ContentTrackerView),
+                new PropertyMetadata("All", OnFilterPropChanged));
+        public string SelectedYear { get => (string)GetValue(SelectedYearProperty); set => SetValue(SelectedYearProperty, value); }
+        
+        // SelectedTag
+        public static readonly DependencyProperty SelectedTagProperty =
+            DependencyProperty.Register("SelectedTag", typeof(string), typeof(ContentTrackerView),
+                new PropertyMetadata("All Tags", OnFilterPropChanged)); 
+        
+        // Дефолт должен совпадать с SearchFilters
+        public string SelectedTag { get => (string)GetValue(SelectedTagProperty); set => SetValue(SelectedTagProperty, value); }
+        
+        // Список доступных тегов (вычисляется автоматически)
+        public ObservableCollection<string> TagList { get; set; } = new ObservableCollection<string>();
 
 
         // === 3. Внутреннее состояние ===

@@ -1,18 +1,19 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Infrastructure.EF.Entity.IndependentEntity;
 
-namespace MediaTracker.Views
+namespace MainComponents.Views
 {
     public partial class ContentCard : UserControl
     {
         // === 1. Dependency Property (Входные данные) ===
         // Это аналог props.item в React
         public static readonly DependencyProperty ItemProperty =
-            DependencyProperty.Register("Item", typeof(ContentItem), typeof(ContentCard));
+            DependencyProperty.Register("Item", typeof(MediaItem), typeof(ContentCard));
 
-        public ContentItem Item
+        public MediaItem Item
         {
-            get { return (ContentItem)GetValue(ItemProperty); }
+            get { return (MediaItem)GetValue(ItemProperty); }
             set { SetValue(ItemProperty, value); }
         }
 
@@ -20,7 +21,7 @@ namespace MediaTracker.Views
         // В WPF события обычно "пузырятся" (Bubbling), но мы сделаем прямые C# события
 
         // Определяем делегаты событий
-        public delegate void CardActionHandler(object sender, ContentItem item);
+        public delegate void CardActionHandler(object sender, MediaItem item);
         public event CardActionHandler ViewDetailClicked;
         public event CardActionHandler DeleteClicked;
         public event CardActionHandler EditClicked; // Для обновления
@@ -73,7 +74,7 @@ namespace MediaTracker.Views
         }
 
         // Метод для копирования свойств из нового объекта в старый
-        private void UpdateCurrentItem(ContentItem target, ContentItem source)
+        private void UpdateCurrentItem(MediaItem target, MediaItem source)
         {
             target.Title = source.Title;
             target.OriginalTitle = source.OriginalTitle;

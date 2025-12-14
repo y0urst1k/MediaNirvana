@@ -1,64 +1,59 @@
-﻿<UserControl x:Class="MediaTracker.Views.ContentList"
+﻿<UserControl x:Class="MainComponents.Views.ContentList"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:MediaTracker.Views"
-             xmlns:helpers="clr-namespace:MediaTracker.Helpers"
+             xmlns:local="clr-namespace:MainComponents.Views"
+             xmlns:helpers="clr-namespace:Infrastructure.Converter;assembly=Infrastructure"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
 
 	<UserControl.Resources>
 		<helpers:EmptyCountToVisibilityConverter x:Key="ShowIfEmpty"/>
-		<helpers:NonEmptyCountToVisibilityConverter x:Key="ShowIfNotEmpty"/>
-	</UserControl.Resources>
+        <helpers:NonEmptyCountToVisibilityConverter x:Key="ShowIfNotEmpty"/>
+    </UserControl.Resources>
 
 	<Grid>
 		<!-- СОСТОЯНИЕ 1: СПИСОК ПУСТ (Placeholder) -->
 		<!-- Виден, только если Items.Count == 0 -->
-		<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Visibility="{Binding Items.Count, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource ShowIfEmpty}}">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Visibility="{Binding Cards.Count, Converter={StaticResource ShowIfEmpty}}"/>
 
-			<!-- Кружок с иконкой -->
-			<Border Background="#F1F5F9" Width="80" Height="80" CornerRadius="40" Margin="0,0,0,20">
-				<Viewbox Width="32" Height="32" Foreground="#94A3B8">
-					<!-- SVG Path из твоего кода -->
-					<Path Fill="Transparent" Stroke="CurrentColor" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+        <!-- Кружок с иконкой -->
+        <Border Background="#F1F5F9" Width="80" Height="80" CornerRadius="40" Margin="0,0,0,20">
+            <Viewbox Width="32" Height="32">
+                <!-- SVG Path из твоего кода -->
+                <Path Fill="Transparent" Stroke="#94A3B8" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                           Data="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-				</Viewbox>
-			</Border>
+            </Viewbox>
+        </Border>
 
-			<TextBlock Text="Элементы не найдены" FontSize="18" FontWeight="SemiBold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-			<TextBlock Text="Начните с добавления вашего первого элемента." FontSize="14" Foreground="#64748B" HorizontalAlignment="Center"/>
-		</StackPanel>
+        <TextBlock Text="Элементы не найдены" FontSize="18" FontWeight="SemiBold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+        <TextBlock Text="Начните с добавления вашего первого элемента." FontSize="14" Foreground="#64748B" HorizontalAlignment="Center"/>
 
-		<!-- СОСТОЯНИЕ 2: СПИСОК ЭЛЕМЕНТОВ (Grid) -->
+
+        <!-- СОСТОЯНИЕ 2: СПИСОК ЭЛЕМЕНТОВ (Grid) -->
 		<!-- Виден, только если Items.Count > 0 -->
-		<ScrollViewer VerticalScrollBarVisibility="Auto" BorderThickness="0" Padding="0,0,20,0"
-                      Visibility="{Binding Items.Count, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource ShowIfNotEmpty}}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" BorderThickness="0" Padding="0,0,20,0"
+                      Visibility="{Binding Cards.Count, Converter={StaticResource ShowIfNotEmpty}}">
 
-			<ItemsControl ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=UserControl}}">
-				<!-- Аналог CSS Grid / Flex Wrap -->
-				<ItemsControl.ItemsPanel>
-					<ItemsPanelTemplate>
-						<WrapPanel Orientation="Horizontal" ItemWidth="320"/>
-						<!-- ItemWidth фиксирует ширину, чтобы было похоже на Grid columns -->
-					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
+                <ItemsControl ItemsSource="{Binding Cards.Count}">
+                    <!-- Аналог CSS Grid / Flex Wrap -->
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" ItemWidth="320"/>
+                            <!-- ItemWidth фиксирует ширину, чтобы было похоже на Grid columns -->
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
 
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<!-- Используем созданный ранее компонент ContentCard -->
-						<!-- Пробрасываем события из Карточки в Список -->
-						<local:ContentCard
-                            Item="{Binding}"
-                            Margin="0,0,15,15"
-                            DeleteClicked="OnCardDelete"
-                            ViewDetailClicked="OnCardDetail"
-                            EditClicked="OnCardEdit"/>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</ScrollViewer>
-	</Grid>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Используем созданный ранее компонент ContentCard -->
+                            <!-- Пробрасываем события из Карточки в Список -->
+                        <local:ContentCard/>
+                    </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+    </Grid>
 </UserControl>
