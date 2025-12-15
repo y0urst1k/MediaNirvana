@@ -22,6 +22,20 @@ namespace MainComponents.ViewModels
         // Для Detail-панели
         public string DetailName { get; private set; }
         public string DetailDesc { get; private set; }
+
+        private bool _isDetailVisible;
+        public bool IsDetailVisible
+        {
+            get => _isDetailVisible;
+            set => SetProperty(ref _isDetailVisible, value);
+        }
+
+        private bool _isListVisible;
+        public bool IsListVisible
+        {
+            get => _isListVisible;
+            set => SetProperty(ref _isListVisible, value);
+        }
         public ObservableCollection<MediaEditModel> DetailItems { get; } = new();
 
         // Команды

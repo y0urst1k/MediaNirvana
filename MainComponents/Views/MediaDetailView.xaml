@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="MediaTracker.Views.MediaDetailView"
+﻿<UserControl x:Class="MainComponents.Views.MediaDetailView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:helpers="clr-namespace:MediaTracker.Helpers"
+             xmlns:helpers="clr-namespace:Infrastructure.Converter;assembly=Infrastructure"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1000">
 
@@ -13,6 +13,8 @@
         <helpers:StatusToForegroundConverter x:Key="StatusFgConv"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <helpers:InverseBooleanConverter x:Key="InvBool"/>
+        <helpers:StringToVisibilityConverter x:Key="StringToVisConv"/>
+        <helpers:NonEmptyCountToVisibilityConverter x:Key="ShowIfNotEmpty"/>
 
         <!-- Стиль для карточек -->
         <Style x:Key="DetailCard" TargetType="Border">
@@ -45,7 +47,7 @@
 
             <!-- ROW 0: HEADER BUTTONS -->
             <DockPanel LastChildFill="False" Grid.Row="0" Margin="0,0,0,20">
-                <Button DockPanel.Dock="Left" Click="Back_Click" Background="Transparent" BorderThickness="0" Cursor="Hand">
+                <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" Background="Transparent" BorderThickness="0" Cursor="Hand">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="←" Margin="0,0,5,0"/>
                         <TextBlock Text="Back"/>
@@ -55,14 +57,14 @@
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <!-- View Mode Buttons -->
                     <StackPanel Orientation="Horizontal" Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}, ConverterParameter=Inverted}">
-                        <Button Content="🗑 Delete" Click="Delete_Click" Background="Transparent" Foreground="#EF4444" BorderThickness="1" BorderBrush="#EF4444" Padding="15,6" Margin="0,0,10,0">
+                        <Button Content="🗑 Delete" Command="{Binding DeleteCommand}" Background="Transparent" Foreground="#EF4444" BorderThickness="1" BorderBrush="#EF4444" Padding="15,6" Margin="0,0,10,0">
                             <Button.Resources>
                                 <Style TargetType="Border">
                                     <Setter Property="CornerRadius" Value="6"/>
                                 </Style>
                             </Button.Resources>
                         </Button>
-                        <Button Content="Edit" Click="Edit_Click" Background="White" BorderThickness="1" BorderBrush="#D1D5DB" Padding="15,6">
+                        <Button Content="Edit" Command="{Binding EditCommand}" Background="White" BorderThickness="1" BorderBrush="#D1D5DB" Padding="15,6">
                             <Button.Resources>
                                 <Style TargetType="Border">
                                     <Setter Property="CornerRadius" Value="6"/>
@@ -73,14 +75,14 @@
 
                     <!-- Edit Mode Buttons -->
                     <StackPanel Orientation="Horizontal" Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
-                        <Button Content="Cancel" Click="Cancel_Click" Background="White" BorderThickness="1" BorderBrush="#D1D5DB" Padding="15,6" Margin="0,0,10,0">
+                        <Button Content="Cancel" Command="{Binding CancelCommand}" Background="White" BorderThickness="1" BorderBrush="#D1D5DB" Padding="15,6" Margin="0,0,10,0">
                             <Button.Resources>
                                 <Style TargetType="Border">
                                     <Setter Property="CornerRadius" Value="6"/>
                                 </Style>
                             </Button.Resources>
                         </Button>
-                        <Button Content="Save" Click="Save_Click" Background="#111827" Foreground="White" Padding="15,6">
+                        <Button Content="Save" Command="{Binding SaveCommand}" Background="#111827" Foreground="White" Padding="15,6">
                             <Button.Resources>
                                 <Style TargetType="Border">
                                     <Setter Property="CornerRadius" Value="6"/>
@@ -107,28 +109,28 @@
 
                     <!-- Info -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding TempItem.Title}" FontSize="24" FontWeight="Bold" TextWrapping="Wrap"/>
-                        <TextBlock Text="{Binding TempItem.OriginalTitle}" Foreground="Gray" Margin="0,2,0,10" 
-                                   Visibility="{Binding TempItem.OriginalTitle, Converter={StaticResource StringToVisConv}}"/>
+                        <TextBlock Text="{Binding CurrentItem.Type}" FontSize="24" FontWeight="Bold" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding CurrentItem.Title}" Foreground="Gray" Margin="0,2,0,10" 
+                                   Visibility="{Binding CurrentItem.OriginalTitle, Converter={StaticResource StringToVisConv}}"/>
 
                         <!-- Badges -->
                         <WrapPanel Orientation="Horizontal">
                             <Border BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,5,5">
-                                <TextBlock Text="{Binding TempItem.Year, StringFormat='📅 {0}'}" FontSize="12"/>
+                                <TextBlock Text="{Binding CurrentItem.Year, StringFormat='📅 {0}'}" FontSize="12"/>
                             </Border>
                             <Border BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,5,5" Visibility="{Binding TempItem.Country, Converter={StaticResource StringToVisConv}}">
-                                <TextBlock Text="{Binding TempItem.Country, StringFormat='🌍 {0}'}" FontSize="12"/>
+                                <TextBlock Text="{Binding CurrentItem.Country, StringFormat='🌍 {0}'}" FontSize="12"/>
                             </Border>
                             <Border BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,5,5" Visibility="{Binding TempItem.DurationMinutes, Converter={StaticResource ShowIfNotEmpty}}">
-                                <TextBlock Text="{Binding TempItem.DurationMinutes, StringFormat='⏱ {0} min'}" FontSize="12"/>
+                                <TextBlock Text="{Binding CurrentItem.DurationMinutes, StringFormat='⏱ {0} min'}" FontSize="12"/>
                             </Border>
                             <Border BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,5,5" Visibility="{Binding TempItem.OfficialRating, Converter={StaticResource StringToVisConv}}">
-                                <TextBlock Text="{Binding TempItem.OfficialRating, StringFormat='🔞 {0}'}" FontSize="12"/>
+                                <TextBlock Text="{Binding CurrentItem.OfficialRating, StringFormat='🔞 {0}'}" FontSize="12"/>
                             </Border>
                         </WrapPanel>
 
                         <!-- Tags -->
-                        <TextBlock Text="{Binding TempItem.TagsString}" Foreground="#2563EB" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding CurrentItem.TagsInput}" Foreground="#2563EB" Margin="0,10,0,0" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -150,7 +152,7 @@
                     <Border Style="{StaticResource DetailCard}">
                         <StackPanel>
                             <TextBlock Text="Description" FontWeight="Bold" Margin="0,0,0,10"/>
-                            <TextBlock Text="{Binding TempItem.Synopsis}" TextWrapping="Wrap" Foreground="#4B5563"/>
+                            <TextBlock Text="{Binding CurrentItem.Synopsis}" TextWrapping="Wrap" Foreground="#4B5563"/>
                         </StackPanel>
                     </Border>
 
@@ -161,20 +163,18 @@
 
                             <Grid Margin="0,0,0,5">
                                 <TextBlock Text="Type" Foreground="Gray"/>
-                                <TextBlock Text="{Binding TempItem.Type}" HorizontalAlignment="Right"/>
+                                <TextBlock Text="{Binding CurrentItem.Type}" HorizontalAlignment="Right"/>
                             </Grid>
-                            <Grid Margin="0,0,0,5" Visibility="{Binding TempItem.SeasonsCount, Converter={StaticResource ShowIfNotEmpty}}">
+                            <Grid Margin="0,0,0,5" Visibility="{Binding CurrentItem.SeasonsCount, Converter={StaticResource ShowIfNotEmpty}}">
                                 <TextBlock Text="Seasons" Foreground="Gray"/>
-                                <TextBlock Text="{Binding TempItem.SeasonsCount}" HorizontalAlignment="Right"/>
+                                <TextBlock Text="{Binding CurrentItem.SeasonsCount}" HorizontalAlignment="Right"/>
                             </Grid>
                             <Grid Margin="0,0,0,5" Visibility="{Binding TempItem.EpisodesCount, Converter={StaticResource ShowIfNotEmpty}}">
                                 <TextBlock Text="Episodes" Foreground="Gray"/>
-                                <TextBlock Text="{Binding TempItem.EpisodesCount}" HorizontalAlignment="Right"/>
+                                <TextBlock Text="{Binding CurrentItem.EpisodesCount}" HorizontalAlignment="Right"/>
                             </Grid>
 
                             <Separator Margin="0,10"/>
-                            <TextBlock Text="{Binding TempItem.AddedDate, StringFormat='Added: {0}'}" Foreground="Gray" FontSize="11"/>
-                            <TextBlock Text="{Binding TempItem.UpdatedDate, StringFormat='Updated: {0}'}" Foreground="Gray" FontSize="11"/>
                         </StackPanel>
                     </Border>
 
@@ -204,23 +204,20 @@
                         <Border Style="{StaticResource DetailCard}" Margin="0,10,0,0">
                             <StackPanel>
                                 <Label Content="Status"/>
-                                <ComboBox x:Name="StatusCombo" IsEnabled="{Binding IsEditing}" Margin="0,0,0,15" Padding="6" SelectedIndex="0">
-                                    <ComboBoxItem Content="Planned"/>
-                                    <ComboBoxItem Content="Watching"/>
-                                    <ComboBoxItem Content="Reading"/>
-                                    <ComboBoxItem Content="Completed"/>
-                                    <ComboBoxItem Content="Paused"/>
+                                <ComboBox x:Name="StatusCombo" ItemsSource="{Binding StatusValues}"
+                                          SelectedItem="{Binding CurrentItem.Status}"
+                                          IsEnabled="{Binding IsEditing}"  Margin="0,0,0,15" Padding="6" SelectedIndex="0">
                                     <ComboBoxItem Content="Abandoned"/>
                                 </ComboBox>
 
                                 <Label Content="Rating (1-10)"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                                    <TextBox Text="{Binding TempItem.Rating}" IsEnabled="{Binding IsEditing}" Width="60" Padding="5"/>
+                                    <TextBox Text="{Binding CurrentItem.PersonalRating, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEditing}" Width="60" Padding="5"/>
                                     <TextBlock Text="/ 10" VerticalAlignment="Center" Margin="5,0,0,0"/>
                                 </StackPanel>
 
                                 <Label Content="Personal Notes"/>
-                                <TextBox Text="{Binding TempItem.Notes}" IsEnabled="{Binding IsEditing}" 
+                                <TextBox Text="{Binding CurrentItem.UserNotes}" IsEnabled="{Binding IsEditing}" 
                                          Height="100" TextWrapping="Wrap" AcceptsReturn="True" Padding="5" 
                                          BorderBrush="#E5E7EB" BorderThickness="1"/>
                             </StackPanel>
@@ -236,7 +233,7 @@
                                         <TextBlock Text="Physical Copy" FontWeight="Bold"/>
                                         <TextBlock Text="I own a physical copy" FontSize="11" Foreground="Gray"/>
                                     </StackPanel>
-                                    <CheckBox IsChecked="{Binding TempItem.HasPhysicalCopy}" IsEnabled="{Binding IsEditing}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <CheckBox IsChecked="{Binding CurrentItem.HasPhysicalCopy}" IsEnabled="{Binding IsEditing}" HorizontalAlignment="Right" VerticalAlignment="Center">
                                         <CheckBox.LayoutTransform>
                                             <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
                                         </CheckBox.LayoutTransform>
@@ -248,7 +245,7 @@
                                         <TextBlock Text="Digital Copy" FontWeight="Bold"/>
                                         <TextBlock Text="I own a digital copy" FontSize="11" Foreground="Gray"/>
                                     </StackPanel>
-                                    <CheckBox IsChecked="{Binding TempItem.HasDigitalCopy}" IsEnabled="{Binding IsEditing}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <CheckBox IsChecked="{Binding CurrentItem.HasDigitalCopy}" IsEnabled="{Binding IsEditing}" HorizontalAlignment="Right" VerticalAlignment="Center">
                                         <CheckBox.LayoutTransform>
                                             <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
                                         </CheckBox.LayoutTransform>
@@ -259,16 +256,16 @@
 
                                 <!-- Inventory Fields -->
                                 <Label Content="Format"/>
-                                <TextBox Text="{Binding TempItem.Format}" IsEnabled="{Binding IsEditing}" Padding="5" Margin="0,0,0,15"/>
+                                <TextBox Text="{Binding CurrentItem.Format}" IsEnabled="{Binding IsEditing}" Padding="5" Margin="0,0,0,15"/>
 
                                 <Label Content="Source"/>
-                                <TextBox Text="{Binding TempItem.Source}" IsEnabled="{Binding IsEditing}" Padding="5" Margin="0,0,0,15"/>
+                                <TextBox Text="{Binding CurrentItem.Source}" IsEnabled="{Binding IsEditing}" Padding="5" Margin="0,0,0,15"/>
 
                                 <Label Content="Location"/>
-                                <TextBox Text="{Binding TempItem.Location}" IsEnabled="{Binding IsEditing}" Padding="5" Margin="0,0,0,15"/>
+                                <TextBox Text="{Binding CurrentItem.Location}" IsEnabled="{Binding IsEditing}" Padding="5" Margin="0,0,0,15"/>
 
                                 <Label Content="Price"/>
-                                <TextBox Text="{Binding TempItem.PurchasePrice}" IsEnabled="{Binding IsEditing}" Padding="5"/>
+                                <TextBox Text="{Binding CurrentItem.PurchasePrice}" IsEnabled="{Binding IsEditing}" Padding="5"/>
                             </StackPanel>
                         </Border>
                     </TabItem>

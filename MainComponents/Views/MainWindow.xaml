@@ -56,9 +56,7 @@
 			<!-- Grid.Column="0" означает, что он займет левую колонку -->
 			<views:MediaSidebar
 				Grid.Column="0"
-				Items="{Binding MediaCollection}"
-				Username="{Binding CurrentUsername}"
-				DataContext="{Binding}"
+				prism:ViewModelLocator.AutoWireViewModel="True"
 			/>
 
 			<!-- === MAIN CONTENT AREA === -->
@@ -68,7 +66,7 @@
                     <Grid Visibility="{Binding ActiveScreen, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Library}">
 						<!-- Теперь вся логика фильтрации и отображения инкапсулирована в ContentTrackerView.Мы просто передаем данные (Items) и слушаем события.-->
 						<views:ContentTrackerView
-							Items="{Binding MediaCollection}"
+							prism:ViewModelLocator.AutoWireViewModel="True"
 							Margin="0,0,0,20"
     />
 					</Grid>
@@ -153,7 +151,7 @@
 		<views:LoginScreen
 			Visibility="{Binding IsLoginVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
 			Grid.ColumnSpan="2"
-			LoginSuccess="{Binding LoginSuccessCommand}"
+			prism:ViewModelLocator.AutoWireViewModel="True"
 		/>
 	</Grid>
 </Window>

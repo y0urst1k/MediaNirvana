@@ -6,10 +6,12 @@
              xmlns:local="clr-namespace:MainComponents.Views"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
-
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
 	<Grid Margin="20">
 		<!-- ГЛАВНЫЙ ВИД: СЕТКА СПИСКОВ -->
-		<Grid x:Name="ListsGrid" Visibility="Visible">
+        <Grid x:Name="ListsGrid" Visibility="{Binding IsListVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="*"/>
@@ -20,11 +22,11 @@
 					<TextBlock Text="Lists &amp; Collections" FontSize="24" FontWeight="Bold"/>
 					<TextBlock Text="Organize your content" Foreground="Gray"/>
 				</StackPanel>
-				<Button Content="+ Create List" Click="CreateList_Click" DockPanel.Dock="Right" Padding="10,5" Background="Black" Foreground="White"/>
+                <Button Content="+ Create List" Command="{Binding CreateListCommand}" DockPanel.Dock="Right" Padding="10,5" Background="Black" Foreground="White"/>
 			</DockPanel>
 
 			<ScrollViewer Grid.Row="1">
-				<ItemsControl ItemsSource="{Binding Lists, RelativeSource={RelativeSource AncestorType=UserControl}}">
+				<ItemsControl ItemsSource="{Binding Lists}">
 					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
 							<WrapPanel Orientation="Horizontal"/>
@@ -47,8 +49,8 @@
 
 									<!-- Кнопки действий (появляются снизу) -->
 									<StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-										<Button Content="✎" Click="EditList_Click" Background="Transparent" BorderThickness="0" Margin="0,0,5,0"/>
-										<Button Content="🗑" Click="DeleteList_Click" Background="Transparent" Foreground="Red" BorderThickness="0"/>
+                                        <Button Content="✎" Command="{Binding DataContext.EditListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Background="Transparent" BorderThickness="0" Margin="0,0,5,0"/>
+                                        <Button Content="🗑" Command="{Binding DataContext.DeleteListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Background="Transparent" Foreground="Red" BorderThickness="0"/>
 									</StackPanel>
 								</Grid>
 							</Border>
@@ -59,7 +61,7 @@
 		</Grid>
 
 		<!-- ДЕТАЛЬНЫЙ ВИД: СОДЕРЖИМОЕ СПИСКА -->
-		<Grid x:Name="ListDetail" Visibility="Collapsed" Background="White">
+        <Grid x:Name="ListDetail" Visibility="{Binding IsDetailVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Background="White">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="*"/>
@@ -68,22 +70,25 @@
 			<Border BorderBrush="#E5E7EB" BorderThickness="0,0,0,1" Padding="0,0,0,15" Margin="0,0,0,15">
 				<DockPanel>
 					<StackPanel DockPanel.Dock="Left">
-						<Button Content="← Back to Lists" Click="CloseDetail_Click" Background="Transparent" BorderThickness="0" Foreground="Gray" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+                        <Button Content="← Back to Lists" Command="{Binding CloseDetailCommand}" Background="Transparent" BorderThickness="0" Foreground="Gray" HorizontalAlignment="Left" Margin="0,0,0,10"/>
 						<TextBlock x:Name="DetailName" Text="List Name" FontSize="24" FontWeight="Bold"/>
 						<TextBlock x:Name="DetailDesc" Text="Description" Foreground="Gray"/>
 					</StackPanel>
-					<Button DockPanel.Dock="Right" Content="+ Manage Items" Click="ManageItems_Click" Padding="10,5" VerticalAlignment="Bottom"/>
+                    <Button DockPanel.Dock="Right" Content="+ Manage Items" Command="{Binding ManageItemsCommand}" Padding="10,5" VerticalAlignment="Bottom"/>
 				</DockPanel>
 			</Border>
 
 			<ScrollViewer Grid.Row="1">
-				<ItemsControl x:Name="DetailItemsControl">
+                <ItemsControl x:Name="DetailItemsControl" ItemsSource="{Binding DetailItems}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<!-- Используем ту же карточку, но в горизонтальном виде или упрощенную -->
 							<Border Margin="0,0,0,10" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="6">
 								<DockPanel>
-									<Button DockPanel.Dock="Right" Content="✕" Click="RemoveItemFromList_Click" Background="Transparent" BorderThickness="0" Foreground="Red"/>
+                                    <Button DockPanel.Dock="Right" 
+                                            Content="✕" 
+                                            Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                            CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Foreground="Red"/>
 									<StackPanel>
 										<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
 										<TextBlock Text="{Binding Type}" FontSize="12" Foreground="Gray"/>

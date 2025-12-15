@@ -1,4 +1,5 @@
-﻿using Infrastructure.EF.Enum;
+﻿using System.Collections.ObjectModel;
+using Infrastructure.EF.Enum;
 
 namespace Infrastructure.DTO
 {
@@ -18,14 +19,14 @@ namespace Infrastructure.DTO
             set => SetProperty(ref _label, value);
         }
 
-        private List<MediaEditModel> _allItems = new();
-        public List<MediaEditModel> AllItems
+        private ObservableCollection<MediaEditModel> _allItems = new();
+        public ObservableCollection<MediaEditModel> AllItems
         {
             get => _allItems;
             set => SetProperty(ref _allItems, value);
         }
 
-        public List<MediaEditModel> TopItems => AllItems.Take(5).ToList();
+        public ObservableCollection<MediaEditModel> TopItems { get; } = new();
 
 
         public int Count => AllItems.Count;
@@ -38,6 +39,38 @@ namespace Infrastructure.DTO
         {
             get => _isExpanded;
             set => SetProperty(ref _isExpanded, value);
+        }
+
+        public void AddItem(MediaEditModel item)
+        {
+            AllItems.Add(item); // Добавляем в конец (или Insert(0, item) для начала)
+
+            UpdateVisuals();
+        }
+
+        public void RemoveItem(Guid id)
+        {
+            var item = AllItems.FirstOrDefault(i => i.Id == id);
+            if (item != null)
+            {
+                AllItems.Remove(item);
+                UpdateVisuals();
+            }
+        }
+
+        private void UpdateVisuals()
+        {
+            // Обновляем TopItems
+            TopItems.Clear();
+            foreach (var item in AllItems.Take(5))
+            {
+                TopItems.Add(item);
+            }
+
+            // Уведомляем UI об изменении счетчиков
+            RaisePropertyChanged(nameof(Count));
+            RaisePropertyChanged(nameof(RemainingCount));
+            RaisePropertyChanged(nameof(HasMore));
         }
     }
 }

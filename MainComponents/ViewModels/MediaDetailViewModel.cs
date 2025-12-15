@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using Infrastructure.DTO;
+using Infrastructure.EF.Enum;
 using MainComponents.Events;
 
 namespace MainComponents.ViewModels
@@ -8,6 +10,7 @@ namespace MainComponents.ViewModels
     public class MediaDetailViewModel : BindableBase
     {
         private readonly IEventAggregator _eventAggregator;
+        private MediaEditModel _originalItem;
 
         // === Свойства для привязки ===
         private MediaEditModel _currentItem;
@@ -37,6 +40,8 @@ namespace MainComponents.ViewModels
             get => _isEditing;
             set => SetProperty(ref _isEditing, value);
         }
+        public IEnumerable<InteractionStatus> StatusValues =>
+        Enum.GetValues(typeof(InteractionStatus)).Cast<InteractionStatus>();
 
         // === Команды ===
         public ICommand EditCommand { get; }
@@ -50,31 +55,38 @@ namespace MainComponents.ViewModels
             _eventAggregator = eventAggregator;
 
             RelatedItems = new ObservableCollection<MediaEditModel>();
+            AllItems = new ObservableCollection<MediaEditModel>();
 
-            EditCommand = new DelegateCommand(Edit);
-            CancelCommand = new DelegateCommand(Cancel);
-            SaveCommand = new DelegateCommand(Save, CanSave)
-                .ObservesProperty(() => IsEditing)
-                .ObservesProperty(() => CurrentItem);
-            DeleteCommand = new DelegateCommand(Delete);
-            BackCommand = new DelegateCommand(Back);
+            EditCommand = new DelegateCommand(() => IsEditing = true);
+            CancelCommand = new DelegateCommand(CancelChanges);
+            SaveCommand = new DelegateCommand(SaveChanges, () => IsEditing)
+                .ObservesProperty(() => IsEditing);
+            DeleteCommand = new DelegateCommand(DeleteItem);
+            BackCommand = new DelegateCommand(GoBack);
 
-            _eventAggregator.GetEvent<ViewMediaDetailEvent>()
-            .Subscribe(OnViewMediaDetailRequested);
+            // Подписка на открытие детального просмотра
+            _eventAggregator.GetEvent<ViewMediaDetailEvent>().Subscribe(OnNavigatedTo);
         }
 
         // === Логика ===
-        public void LoadItem(MediaEditModel item)
+        private void OnNavigatedTo(MediaEditModel item)
         {
-            CurrentItem = item;
+            if (item == null) return;
+
+            // Сохраняем ссылку на оригинал (или копию из стора)
+            _originalItem = item;
+
+            // Создаем клон для работы в UI
+            CurrentItem = (MediaEditModel)_originalItem.Clone();
+
             IsEditing = false;
-            FindRelatedItems(item);
+            FindRelatedItems(CurrentItem);
         }
 
         private void FindRelatedItems(MediaEditModel current)
         {
             RelatedItems.Clear();
-            if (AllItems == null) return;
+            if (AllItems == null || !AllItems.Any()) return;
 
             string firstWord = current.Title.Split(' ')[0];
             var related = AllItems
@@ -83,60 +95,58 @@ namespace MainComponents.ViewModels
                                current.Title.Contains(i.Title.Split(' ')[0])))
                 .Take(3)
                 .ToList();
+
             foreach (var item in related) RelatedItems.Add(item);
         }
 
         // === Обработчики команд ===
-        private void Edit() => IsEditing = true;
-
-        private void Cancel() => LoadItem(CurrentItem);
-
-
-        private bool CanSave() => IsEditing && CurrentItem != null;
-
-        private void Save()
+        private void CancelChanges()
         {
-            // 1. Публикуем событие обновления
-            _eventAggregator.GetEvent<ItemUpdatedEvent>().Publish(CurrentItem);
+            // Просто заново клонируем оригинал, затирая изменения
+            CurrentItem = (MediaEditModel)_originalItem.Clone();
+            IsEditing = false;
+        }
 
+        private void SaveChanges()
+        {
+            // Переносим изменения из CurrentItem в _originalItem 
+            // (Это нужно, если список родителя ссылается на _originalItem)
+            ApplyChanges(_originalItem, CurrentItem);
 
-            // 2. Дополнительно: можно уведомить о завершении редактирования
-            _eventAggregator.GetEvent<ViewMediaDetailEvent>().Publish(CurrentItem); // Повторная публикация
-
+            // Отправляем событие о сохранении в базу
+            _eventAggregator.GetEvent<ItemUpdatedEvent>().Publish(_originalItem);
 
             IsEditing = false;
         }
 
-        private void Delete()
+        private void DeleteItem()
         {
-            var result = System.Windows.MessageBox.Show(
-                $"Delete '{CurrentItem.Title}'?", "Confirm",
-                System.Windows.MessageBoxButton.YesNo);
-
-            if (result == System.Windows.MessageBoxResult.Yes)
+            var result = MessageBox.Show($"Delete '{CurrentItem.Title}'?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.Yes)
             {
-                // Публикуем событие удаления с ID
                 _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Publish(CurrentItem.Id);
+                GoBack();
             }
         }
 
-        private void Back()
+        private void ApplyChanges(MediaEditModel target, MediaEditModel source)
+        {
+            target.Status = source.Status;
+            target.PersonalRating = source.PersonalRating;
+            target.UserNotes = source.UserNotes;
+            target.HasPhysicalCopy = source.HasPhysicalCopy;
+            target.HasDigitalCopy = source.HasDigitalCopy;
+            target.Format = source.Format;
+            target.Source = source.Source;
+            target.Location = source.Location;
+            target.PurchasePrice = source.PurchasePrice;
+
+        }
+
+        private void GoBack()
         {
             // Возвращаемся на предыдущий экран
             _eventAggregator.GetEvent<ViewMediaDetailEvent>().Publish(null); // null = закрыть детальный вид
-        }
-
-        private void OnViewMediaDetailRequested(MediaEditModel item)
-        {
-            if (item == null)
-            {
-                // Закрываем детальный экран (например, возвращаемся в библиотеку)
-                // Можно опубликовать другое событие или использовать INavigationService
-                return;
-            }
-
-            // Загружаем выбранный item
-            LoadItem(item);
         }
     }
 }

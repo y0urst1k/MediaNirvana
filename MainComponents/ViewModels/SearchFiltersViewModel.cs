@@ -1,7 +1,12 @@
-﻿namespace MainComponents.ViewModels
+﻿using Infrastructure.DTO;
+using MainComponents.Events;
+
+namespace MainComponents.ViewModels
 {
     public class SearchFiltersViewModel : BindableBase
     {
+        private readonly IEventAggregator _eventAggregator;
+
         // === Свойства фильтров ===
         private string _searchQuery = "";
         public string SearchQuery
@@ -10,7 +15,7 @@
             set
             {
                 SetProperty(ref _searchQuery, value);
-                CheckFilters();
+                UpdateFilters();
             }
         }
 
@@ -21,7 +26,7 @@
             set
             {
                 SetProperty(ref _selectedType, value);
-                CheckFilters();
+                UpdateFilters();
             }
         }
 
@@ -32,7 +37,7 @@
             set
             {
                 SetProperty(ref _selectedYear, value);
-                CheckFilters();
+                UpdateFilters();
             }
         }
 
@@ -43,16 +48,12 @@
             set
             {
                 SetProperty(ref _selectedTag, value);
-                CheckFilters();
+                UpdateFilters();
             }
         }
-
-        private IEnumerable<string> _availableTags;
-        public IEnumerable<string> AvailableTags
-        {
-            get => _availableTags;
-            set => SetProperty(ref _availableTags, value);
-        }
+        public IEnumerable<string> Types { get; } = new[] { "All", "Book", "Movie", "Series", "Game" };
+        public IEnumerable<string> Years { get; } = new[] { "All", "2024", "2023", "2022", "Old" };
+        public IEnumerable<string> AvailableTags { get; set; }
 
         // === Флаг активных фильтров ===
         private bool _hasActiveFilters;
@@ -71,14 +72,26 @@
         }
 
         // === Логика проверки фильтров ===
-        private void CheckFilters()
+        private void UpdateFilters()
         {
+            // 1. Обновляем флаг UI
             bool hasSearch = !string.IsNullOrEmpty(SearchQuery);
-            bool hasType = SelectedType != "All" && SelectedType != null;
-            bool hasYear = SelectedYear != "All" && SelectedYear != null;
-            bool hasTag = SelectedTag != "All Tags" && SelectedTag != null;
+            bool hasType = SelectedType != "All";
+            bool hasYear = SelectedYear != "All";
+            bool hasTag = SelectedTag != "All Tags";
 
             HasActiveFilters = hasSearch || hasType || hasYear || hasTag;
+
+            // 2. Публикуем событие для списка медиа
+            var filterState = new FilterState
+            {
+                Query = SearchQuery,
+                Type = SelectedType,
+                Year = SelectedYear,
+                Tag = SelectedTag
+            };
+
+            _eventAggregator.GetEvent<FilterChangedEvent>().Publish(filterState);
         }
 
         // === Обработка очистки ===

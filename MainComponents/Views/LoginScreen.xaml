@@ -99,12 +99,12 @@
                 <!-- Form -->
                 <StackPanel Margin="0,10,0,0">
                     <Label Content="Никнейм" Foreground="#0F172A" FontWeight="Medium" Margin="0,0,0,5" Padding="0"/>
-                    <TextBox x:Name="UserBox" Margin="0,0,0,15" KeyDown="Input_KeyDown"/>
+                    <TextBox x:Name="UserBox" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
 
                     <Label Content="Пароль" Foreground="#0F172A" FontWeight="Medium" Margin="0,0,0,5" Padding="0"/>
-                    <PasswordBox x:Name="PassBox" Margin="0,0,0,25" KeyDown="Input_KeyDown"/>
+                    <PasswordBox x:Name="PassBox" Margin="0,0,0,25" PasswordChanged="PassBox_PasswordChanged"/>
 
-                    <Button Content="Войти" Click="Submit_Click"/>
+                    <Button Content="Войти" Command="{Binding LoginCommand}" IsDefault="True"/>
                 </StackPanel>
             </StackPanel>
         </Border>

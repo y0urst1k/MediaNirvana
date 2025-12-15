@@ -15,7 +15,7 @@ namespace MainComponents.ViewModels
         public ObservableCollection<MediaEditModel> Items
         {
             get => _items;
-            set => SetProperty(ref _items, value);
+            set { SetProperty(ref _items, value); InitializeFilteredView(); UpdateTagsList(); }
         }
 
         // === 2. Свойства фильтров ===
@@ -23,28 +23,28 @@ namespace MainComponents.ViewModels
         public string SearchText
         {
             get => _searchText;
-            set => SetProperty(ref _searchText, value, OnFilterChanged);
+            set { SetProperty(ref _searchText, value); RefreshFilter(); }
         }
 
         private string _selectedType = "All";
         public string SelectedType
         {
             get => _selectedType;
-            set => SetProperty(ref _selectedType, value, OnFilterChanged);
+            set { SetProperty(ref _selectedType, value); RefreshFilter(); }
         }
 
         private string _selectedYear = "All";
         public string SelectedYear
         {
             get => _selectedYear;
-            set => SetProperty(ref _selectedYear, value, OnFilterChanged);
+            set { SetProperty(ref _selectedYear, value); RefreshFilter(); }
         }
 
         private string _selectedTag = "All Tags";
         public string SelectedTag
         {
             get => _selectedTag;
-            set => SetProperty(ref _selectedTag, value, OnFilterChanged);
+            set { SetProperty(ref _selectedTag, value); RefreshFilter(); }
         }
 
         // Список доступных тегов (вычисляется автоматически)
@@ -80,21 +80,40 @@ namespace MainComponents.ViewModels
         public DelegateCommand<MediaEditModel> DeleteCommand { get; }
         public DelegateCommand<MediaEditModel> DetailCommand { get; }
 
+        // Команда для радио-кнопок
+        public DelegateCommand<string> SetStatusFilterCommand { get; }
+        // Команда для кнопки Clear
+        public DelegateCommand ClearFiltersCommand { get; }
+
         public ContentTrackerViewModel(IEventAggregator eventAggregator)
         {
             _eventAggregator = eventAggregator;
-
-            // Инициализация команд
-            AddCommand = new DelegateCommand(OnAdd);
-            DeleteCommand = new DelegateCommand<MediaEditModel>(OnDelete);
-            DetailCommand = new DelegateCommand<MediaEditModel>(OnDetail);
-
-            // Инициализация коллекции тегов
             TagList = new ObservableCollection<string>();
 
-            _eventAggregator.GetEvent<MediaAddedEvent>().Subscribe(OnMediaAdded);
-            _eventAggregator.GetEvent<ItemUpdatedEvent>().Subscribe(OnItemUpdated);
-            _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Subscribe(OnDeleteRequested);
+            AddCommand = new DelegateCommand(() => _eventAggregator.GetEvent<AddMediaRequestedEvent>().Publish());
+            DeleteCommand = new DelegateCommand<MediaEditModel>(item => _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Publish(item.Id));
+            DetailCommand = new DelegateCommand<MediaEditModel>(item => _eventAggregator.GetEvent<ViewMediaDetailEvent>().Publish(item));
+
+            SetStatusFilterCommand = new DelegateCommand<string>(status =>
+            {
+                _statusFilter = status;
+                RefreshFilter();
+            });
+
+            ClearFiltersCommand = new DelegateCommand(() =>
+            {
+                SearchText = "";
+                SelectedType = "All";
+                SelectedYear = "All";
+                SelectedTag = "All Tags";
+                _statusFilter = "All";
+                // RefreshFilter вызовется в сеттерах
+            });
+
+            // Подписки на внешние изменения данных
+            _eventAggregator.GetEvent<MediaAddedEvent>().Subscribe(_ => { UpdateTagsList(); RefreshFilter(); });
+            _eventAggregator.GetEvent<ItemUpdatedEvent>().Subscribe(_ => { UpdateTagsList(); RefreshFilter(); });
+            _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Subscribe(_ => RefreshFilter());
         }
 
         // === ИНИЦИАЛИЗАЦИЯ ===
@@ -108,9 +127,12 @@ namespace MainComponents.ViewModels
 
         private void InitializeFilteredView()
         {
+            if (_items == null) return;
             FilteredView = CollectionViewSource.GetDefaultView(_items);
             FilteredView.Filter = FilterItem;
         }
+
+        private void RefreshFilter() => FilteredView?.Refresh();
 
         // === ЛОГИКА ФИЛЬТРАЦИИ ===
         private bool FilterItem(object obj)
@@ -243,28 +265,6 @@ namespace MainComponents.ViewModels
         private void OnDeleteRequested(Guid mediaId)
         {
             OnFilterChanged(); // Обновляем отображение
-        }
-
-        private void UpdateFilteredView()
-        {
-            // Проверяем, инициализирован ли FilteredView
-            if (FilteredView == null)
-            {
-                // Если нет — создаём новый ICollectionView
-                FilteredView = CollectionViewSource.GetDefaultView(Items);
-                FilteredView.Filter = FilterItem;
-            }
-            else
-            {
-                // Если уже есть — просто обновляем данные
-                FilteredView.Refresh();
-            }
-
-            // Обновляем список тегов (так как могли добавиться новые теги в новом элементе)
-            UpdateTagsList();
-
-            // Дополнительно можно обновить состояние фильтров, если нужно
-            OnFilterChanged();
         }
     }
 }

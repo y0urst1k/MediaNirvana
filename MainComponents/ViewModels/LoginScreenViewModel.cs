@@ -1,4 +1,6 @@
-﻿using Infrastructure.Interface;
+﻿using System.Reflection.Metadata;
+using System.Windows.Controls;
+using Infrastructure.Interface;
 using MainComponents.Events;
 
 namespace MainComponents.ViewModels
@@ -24,8 +26,8 @@ namespace MainComponents.ViewModels
         }
 
         // Команды
-        private DelegateCommand _loginCommand;
-        public DelegateCommand LoginCommand => _loginCommand;
+        private DelegateCommand<object> _loginCommand;
+        public DelegateCommand<object> LoginCommand => _loginCommand;
 
         public LoginScreenViewModel(
             ISessionService sessionService,
@@ -34,7 +36,7 @@ namespace MainComponents.ViewModels
             _sessionService = sessionService;
             _eventAggregator = eventAggregator;
 
-            _loginCommand = new DelegateCommand(ExecuteLogin, CanExecuteLogin);
+            _loginCommand = new DelegateCommand<object>(ExecuteLogin, CanExecuteLogin);
 
             PropertyChanged += (s, e) =>
             {
@@ -43,11 +45,25 @@ namespace MainComponents.ViewModels
             };
         }
 
-        private bool CanExecuteLogin() =>
-            !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password);
-
-        private async void ExecuteLogin()
+        private bool CanExecuteLogin(object parameter)
         {
+            // Проверка на пустоту имени
+            if (string.IsNullOrWhiteSpace(Username)) return false;
+
+            // Проверка пароля из PasswordBox (parameter)
+            if (parameter is PasswordBox passwordBox)
+            {
+                return !string.IsNullOrWhiteSpace(passwordBox.Password);
+            }
+            return false;
+        }
+
+        private async void ExecuteLogin(object parameter)
+        {
+            var passwordBox = parameter as PasswordBox;
+            // Получаем пароль напрямую из контрола для отправки
+            string password = passwordBox?.Password ?? "";
+
             try
             {
                 await _sessionService.Login(Username, Password);
@@ -59,7 +75,7 @@ namespace MainComponents.ViewModels
 
                     // Очищаем поля
                     Username = string.Empty;;
-                    Password = string.Empty; ;
+                    passwordBox?.Clear();
                 }
                 else
                 {

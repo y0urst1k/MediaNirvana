@@ -2,7 +2,7 @@
 
 namespace Infrastructure.DTO
 {
-    public class MediaEditModel : BindableBase
+    public class MediaEditModel : BindableBase, ICloneable
     {
         public Guid Id { get; set; }
 
@@ -33,5 +33,13 @@ namespace Infrastructure.DTO
         public MediaSource? Source { get; set; }
         public DateTimeOffset? AcquisitionDate { get; set; }
         public string? Location { get; set; }
+        public bool HasPhysicalCopy { get; set; }
+        public bool HasDigitalCopy { get; set; }
+
+        public double PurchasePrice { get; set; }
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }
