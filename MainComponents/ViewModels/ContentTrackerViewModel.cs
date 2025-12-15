@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows.Data;
 using Infrastructure.DTO;
+using Infrastructure.Interface;
 using MainComponents.Events;
 
 namespace MainComponents.ViewModels
@@ -9,6 +10,14 @@ namespace MainComponents.ViewModels
     public class ContentTrackerViewModel : BindableBase
     {
         private readonly IEventAggregator _eventAggregator;
+        private readonly IEditContentDialogService _editDialogService;
+
+        // === ДОЧЕРНИЕ VIEWMODELS ===
+        public StatsOverviewViewModel StatsVM { get; }
+        public SearchFiltersViewModel FiltersVM { get; }
+
+        // === ДАННЫЕ ===
+        private ObservableCollection<MediaEditModel> _allItemsSource; // Полный список
 
         // === 1. Входные данные (привязываются из View) ===
         private ObservableCollection<MediaEditModel> _items;
@@ -75,24 +84,34 @@ namespace MainComponents.ViewModels
             private set => SetProperty(ref _filteredView, value);
         }
 
+        // Состояние фильтра (получаем от FiltersVM через событие)
+        private FilterState _currentFilters = new FilterState();
+
         // === 4. Команды (вместо RoutedEvents) ===
         public DelegateCommand AddCommand { get; }
         public DelegateCommand<MediaEditModel> DeleteCommand { get; }
         public DelegateCommand<MediaEditModel> DetailCommand { get; }
+        public DelegateCommand<MediaEditModel> EditCommand { get; }
 
         // Команда для радио-кнопок
         public DelegateCommand<string> SetStatusFilterCommand { get; }
         // Команда для кнопки Clear
         public DelegateCommand ClearFiltersCommand { get; }
 
-        public ContentTrackerViewModel(IEventAggregator eventAggregator)
+        public ContentTrackerViewModel(IEventAggregator eventAggregator, IEditContentDialogService editDialogService)
         {
             _eventAggregator = eventAggregator;
             TagList = new ObservableCollection<string>();
+            _editDialogService = editDialogService;
+
+            // 1. Инициализация дочерних VM
+            StatsVM = new StatsOverviewViewModel();
+            FiltersVM = new SearchFiltersViewModel(eventAggregator);
 
             AddCommand = new DelegateCommand(() => _eventAggregator.GetEvent<AddMediaRequestedEvent>().Publish());
-            DeleteCommand = new DelegateCommand<MediaEditModel>(item => _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Publish(item.Id));
-            DetailCommand = new DelegateCommand<MediaEditModel>(item => _eventAggregator.GetEvent<ViewMediaDetailEvent>().Publish(item));
+            DeleteCommand = new DelegateCommand<MediaEditModel>(OnDelete);
+            DetailCommand = new DelegateCommand<MediaEditModel>(OnDetail);
+            EditCommand = new DelegateCommand<MediaEditModel>(OnEdit);
 
             SetStatusFilterCommand = new DelegateCommand<string>(status =>
             {
@@ -120,9 +139,20 @@ namespace MainComponents.ViewModels
         // Привязка к внешней коллекции
         public void SetSourceItems(ObservableCollection<MediaEditModel> items)
         {
-            _items = items;
-            InitializeFilteredView();
-            UpdateTagsList();
+            _allItemsSource = items;
+
+            // 1. Настраиваем View для списка
+            FilteredView = CollectionViewSource.GetDefaultView(_allItemsSource);
+            FilteredView.Filter = FilterItem;
+
+            // 2. Передаем данные в Статистику (она сама посчитает цифры)
+            StatsVM.Items = _allItemsSource;
+
+            // 3. Вычисляем теги и отдаем в Фильтр
+            UpdateAvailableTags();
+
+            // Подписываемся на изменения в исходной коллекции, чтобы обновлять теги
+            _allItemsSource.CollectionChanged += (s, e) => UpdateAvailableTags();
         }
 
         private void InitializeFilteredView()
@@ -139,51 +169,24 @@ namespace MainComponents.ViewModels
         {
             if (obj is not MediaEditModel item) return false;
 
-            // 1. Status
-            if (!string.Equals(_statusFilter, "All", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(item.Status.ToString(), _statusFilter, StringComparison.OrdinalIgnoreCase))
-                return false;
+            // Проверка табов статуса (верхний уровень)
+            if (_statusFilter != "All" && item.Status.ToString() != _statusFilter) return false;
 
-            // 2. Search Query
-            if (!string.IsNullOrWhiteSpace(SearchText))
+            // Проверка фильтров из дочерней VM
+            if (!_currentFilters.IsActive) return true;
+
+            if (!string.IsNullOrEmpty(_currentFilters.Query))
             {
-                string query = SearchText.ToLower();
-                if ((!item.Title?.ToLower().Contains(query) ?? true) &&
-                    (!item.OriginalTitle?.ToLower().Contains(query) ?? true) &&
-                    (!item.Country?.ToLower().Contains(query) ?? true))
-                    return false;
+                if (!item.Title.Contains(_currentFilters.Query, StringComparison.OrdinalIgnoreCase)) return false;
             }
 
-            // 3. Type
-            if (!string.IsNullOrEmpty(SelectedType) &&
-                !string.Equals(SelectedType, "All", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(item.Type.ToString(), SelectedType, StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            // 4. Year
-            if (!string.IsNullOrEmpty(SelectedYear) &&
-                !string.Equals(SelectedYear, "All", StringComparison.OrdinalIgnoreCase))
+            if (_currentFilters.Type != "All" && item.Type.ToString() != _currentFilters.Type) return false;
+            if (_currentFilters.Year != "All")
             {
-                if (string.Equals(SelectedYear, "Older", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (item.Year >= 2020) return false;
-                }
-                else
-                {
-                    if (!string.Equals(item.Year.ToString(), SelectedYear, StringComparison.OrdinalIgnoreCase))
-                        return false;
-                }
+                if (_currentFilters.Year == "Old" && item.Year >= 2020) return false;
+                if (_currentFilters.Year != "Old" && item.Year?.ToString() != _currentFilters.Year) return false;
             }
-
-            // 5. Tag
-            if (!string.IsNullOrEmpty(SelectedTag) &&
-                !string.Equals(SelectedTag, "All Tags", StringComparison.OrdinalIgnoreCase))
-            {
-                if (string.IsNullOrWhiteSpace(item.TagsInput) ||
-                    !item.TagsInput.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                        .Contains(SelectedTag, StringComparer.OrdinalIgnoreCase))
-                    return false;
-            }
+            if (_currentFilters.Tag != "All Tags" && !item.TagsInput.Contains(_currentFilters.Tag)) return false;
 
             return true;
         }
@@ -192,24 +195,6 @@ namespace MainComponents.ViewModels
         private void OnFilterChanged()
         {
             FilteredView?.Refresh();
-        }
-
-        // === ОБРАБОТЧИКИ КОМАНД ===
-        private void OnAdd()
-        {
-            // Можно опубликовать событие через EventAggregator
-            _eventAggregator.GetEvent<AddMediaRequestedEvent>().Publish();
-        }
-
-        private void OnDelete(MediaEditModel item)
-        {
-            _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Publish(item.Id);
-        }
-
-        private void OnDetail(MediaEditModel item)
-        {
-            if (item == null) return;
-            _eventAggregator.GetEvent<ViewMediaDetailEvent>().Publish(item);
         }
 
         // Смена статуса (из RadioButton)
@@ -250,21 +235,45 @@ namespace MainComponents.ViewModels
             }
         }
 
-        private void OnMediaAdded(MediaEditModel model)
+        private void OnDetail(MediaEditModel item) => _eventAggregator.GetEvent<ViewMediaDetailEvent>().Publish(item);
+
+        private void OnDelete(MediaEditModel item)
         {
-            UpdateTagsList(); // Обновляем теги при добавлении
-            OnFilterChanged(); // Перефильтровываем
+            // Можно тут вызвать MessageBox или сервис диалогов перед удалением
+            _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Publish(item.Id);
         }
 
-        private void OnItemUpdated(MediaEditModel updatedItem)
+        private async void OnEdit(MediaEditModel item)
         {
-            UpdateTagsList(); // Возможно, изменились теги
-            OnFilterChanged(); // Перефильтровываем
+            var updatedItem = await _editDialogService.ShowEditDialogAsync(item);
+            if (updatedItem != null)
+            {
+                // Обновляем поля существующего объекта, чтобы UI обновился
+                // (Лучше использовать AutoMapper или метод копирования)
+                item.Title = updatedItem.Title;
+                item.Status = updatedItem.Status;
+                item.UserNotes = updatedItem.UserNotes;
+                // ... остальные поля ...
+
+                _eventAggregator.GetEvent<ItemUpdatedEvent>().Publish(item);
+            }
         }
 
-        private void OnDeleteRequested(Guid mediaId)
+        private void UpdateAvailableTags()
         {
-            OnFilterChanged(); // Обновляем отображение
+            if (_allItemsSource == null) return;
+
+            var tags = _allItemsSource
+                .SelectMany(x => x.TagsInput.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                .Select(t => t.Trim())
+                .Distinct()
+                .OrderBy(t => t)
+                .ToList();
+
+            tags.Insert(0, "All Tags");
+
+            // Передаем в дочернюю VM
+            FiltersVM.AvailableTags = tags;
         }
     }
 }

@@ -64,6 +64,8 @@ namespace MainComponents.ViewModels
             DeleteCommand = new DelegateCommand(DeleteItem);
             BackCommand = new DelegateCommand(GoBack);
 
+
+            _eventAggregator.GetEvent<MediaLibraryLoadedEvent>().Subscribe(items => AllItems = items);
             // Подписка на открытие детального просмотра
             _eventAggregator.GetEvent<ViewMediaDetailEvent>().Subscribe(OnNavigatedTo);
         }

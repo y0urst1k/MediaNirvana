@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using MainComponents.ViewModels;
 
-namespace MediaTracker.Views
+namespace MainComponents.Views
 {
     public partial class LoginScreen : UserControl
     {

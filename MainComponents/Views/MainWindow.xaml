@@ -4,9 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MainComponents"
-        xmlns:views="clr-namespace:MainComponents.Views;assembly=MainComponents"
         xmlns:prism="http://prismlibrary.com/"
-        xmlns:converters="clr-namespace:Infrastructure.Converter;assembly=Infrastructure"
+        xmlns:converters="clr-namespace:Infrastructure.Converter;assembly=Infrastructure" xmlns:views="clr-namespace:MainComponents.Views"
         prism:ViewModelLocator.AutoWireViewModel="True"
         mc:Ignorable="d"
         Title="MediaNirvana" Height="700" Width="1200"
@@ -54,10 +53,7 @@
 
 			<!-- === SIDEBAR === -->
 			<!-- Grid.Column="0" означает, что он займет левую колонку -->
-			<views:MediaSidebar
-				Grid.Column="0"
-				prism:ViewModelLocator.AutoWireViewModel="True"
-			/>
+			<views:MediaSidebar Grid.Column="0" prism:ViewModelLocator.AutoWireViewModel="True"/>
 
 			<!-- === MAIN CONTENT AREA === -->
 			<Border Grid.Column="1" Padding="40">
@@ -71,10 +67,8 @@
     />
 					</Grid>
 
-					<Grid x:Name="ListsScreen" Visibility="Collapsed">
-						<views:ListsScreen
-							Lists="{Binding Lists}"
-							AllItems="{Binding Items}"/>
+                    <Grid x:Name="ListsScreen" Visibility="{Binding ActiveScreen, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Lists}">
+                        <views:ListsScreen prism:ViewModelLocator.AutoWireViewModel="True"/>
 					</Grid>
 
 					<!-- ЭКРАН 2: DETAIL VIEW (Детали) -->

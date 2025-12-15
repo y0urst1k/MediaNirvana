@@ -61,6 +61,16 @@ namespace MainComponents.ViewModels
 
             // 3. Подписка на удаление
             _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Subscribe(OnMediaDeleted);
+
+            _eventAggregator.GetEvent<MediaLibraryLoadedEvent>().Subscribe(OnLibraryLoaded);
+        }
+
+        private void OnLibraryLoaded(ObservableCollection<MediaEditModel> items)
+        {
+            // Важно не заменять коллекцию Items полностью, если она привязана, 
+            // но лучше просто скопировать или присвоить ссылку, если View умеет обновляться.
+            Items = items;
+            // RebuildCategories вызовется автоматически в сеттере Items
         }
 
         private void OnMediaAdded(MediaEditModel newItem)

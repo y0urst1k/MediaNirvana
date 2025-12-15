@@ -103,7 +103,7 @@
 
                     <!-- Icon -->
                     <Border Grid.Column="0" Width="80" Height="80" Background="#F3F4F6" CornerRadius="12" Margin="0,0,20,0">
-                        <TextBlock Text="{Binding TempItem.Type, Converter={StaticResource TypeIconConv}}" 
+                        <TextBlock Text="{Binding CurrentItem.Type, Converter={StaticResource TypeIconConv}}" 
                                    FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
 
@@ -207,7 +207,6 @@
                                 <ComboBox x:Name="StatusCombo" ItemsSource="{Binding StatusValues}"
                                           SelectedItem="{Binding CurrentItem.Status}"
                                           IsEnabled="{Binding IsEditing}"  Margin="0,0,0,15" Padding="6" SelectedIndex="0">
-                                    <ComboBoxItem Content="Abandoned"/>
                                 </ComboBox>
 
                                 <Label Content="Rating (1-10)"/>

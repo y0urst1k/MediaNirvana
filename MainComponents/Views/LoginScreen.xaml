@@ -1,13 +1,14 @@
-<UserControl x:Class="MediaTracker.Views.LoginScreen"
+п»ї<UserControl x:Class="MainComponents.Views.LoginScreen"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
 
     <UserControl.Resources>
-        <!-- Стилизация полей ввода (Input) -->
         <Style TargetType="TextBox">
             <Setter Property="Padding" Value="10"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -26,8 +27,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- Стилизация поля пароля -->
         <Style TargetType="PasswordBox">
             <Setter Property="Padding" Value="10"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -46,8 +45,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- Стилизация кнопки -->
         <Style TargetType="Button">
             <Setter Property="Background" Value="#0F172A"/>
             <!-- Slate-900 -->
@@ -72,12 +69,8 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-
-    <!-- Фон страницы -->
     <Grid Background="#F8FAFC">
         <!-- Slate-50 -->
-
-        <!-- Карточка (Card) -->
         <Border Background="White" Width="400" VerticalAlignment="Center" HorizontalAlignment="Center" 
                 CornerRadius="12" Padding="30">
             <Border.Effect>
@@ -87,24 +80,23 @@
             <StackPanel>
                 <!-- Header -->
                 <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
-                    <!-- Логотип (Векторный аналог картинки) -->
                     <Viewbox Width="60" Height="60" Margin="0,0,0,10">
                         <Path Fill="#0F172A" Data="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/>
                     </Viewbox>
 
                     <TextBlock Text="MediaNirvana" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Войдите в свой аккаунт" Foreground="#64748B" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Р’РѕР№РґРёС‚Рµ РІ СЃРІРѕР№ Р°РєРєР°СѓРЅС‚" Foreground="#64748B" Margin="0,5,0,0" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- Form -->
                 <StackPanel Margin="0,10,0,0">
-                    <Label Content="Никнейм" Foreground="#0F172A" FontWeight="Medium" Margin="0,0,0,5" Padding="0"/>
+                    <Label Content="РќРёРєРЅРµР№Рј" Foreground="#0F172A" FontWeight="Medium" Margin="0,0,0,5" Padding="0"/>
                     <TextBox x:Name="UserBox" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
 
-                    <Label Content="Пароль" Foreground="#0F172A" FontWeight="Medium" Margin="0,0,0,5" Padding="0"/>
+                    <Label Content="РџР°СЂРѕР»СЊ" Foreground="#0F172A" FontWeight="Medium" Margin="0,0,0,5" Padding="0"/>
                     <PasswordBox x:Name="PassBox" Margin="0,0,0,25" PasswordChanged="PassBox_PasswordChanged"/>
 
-                    <Button Content="Войти" Command="{Binding LoginCommand}" IsDefault="True"/>
+                    <Button Content="Р’РѕР№С‚Рё" Command="{Binding LoginCommand}" IsDefault="True"/>
                 </StackPanel>
             </StackPanel>
         </Border>

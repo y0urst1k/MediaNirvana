@@ -1,22 +1,38 @@
 ﻿using System.Collections.ObjectModel;
 using Infrastructure.DTO;
+using MainComponents.Events;
 
 namespace MainComponents.ViewModels
 {
     public class ListScreenViewModel : BindableBase
     {
         private readonly IDialogService _dialogService;
+        private readonly IEventAggregator _eventAggregator;
 
         // Данные
         public ObservableCollection<PersonalListEditModel> Lists { get; } = new();
-        public ObservableCollection<MediaEditModel> AllItems { get; } = new();
+        public ObservableCollection<MediaEditModel> AllItems { get; private set; } = new();
+        public ObservableCollection<MediaEditModel> DetailItems { get; } = new();
 
         // Текущно выбранный список
         private PersonalListEditModel _selectedList;
         public PersonalListEditModel SelectedList
         {
             get => _selectedList;
-            set => SetProperty(ref _selectedList, value);
+            set
+            {
+                if (SetProperty(ref _selectedList, value))
+                {
+                    // Автоматическое переключение видимости при выборе списка
+                    IsListVisible = _selectedList == null;
+                    IsDetailVisible = _selectedList != null;
+
+                    if (_selectedList != null)
+                    {
+                        RefreshDetailItems();
+                    }
+                }
+            }
         }
 
         // Для Detail-панели
@@ -36,7 +52,6 @@ namespace MainComponents.ViewModels
             get => _isListVisible;
             set => SetProperty(ref _isListVisible, value);
         }
-        public ObservableCollection<MediaEditModel> DetailItems { get; } = new();
 
         // Команды
         public DelegateCommand<PersonalListEditModel> OpenDetailCommand { get; }
@@ -53,39 +68,38 @@ namespace MainComponents.ViewModels
             _dialogService = dialogService;
 
             // Инициализация команд
-            OpenDetailCommand = new DelegateCommand<PersonalListEditModel>(OpenDetail);
-            CloseDetailCommand = new DelegateCommand(CloseDetail);
+            OpenDetailCommand = new DelegateCommand<PersonalListEditModel>(list => SelectedList = list);
+            CloseDetailCommand = new DelegateCommand(() => SelectedList = null);
+
             CreateListCommand = new DelegateCommand(CreateList);
             EditListCommand = new DelegateCommand<PersonalListEditModel>(EditList);
             DeleteListCommand = new DelegateCommand<PersonalListEditModel>(DeleteList);
             ManageItemsCommand = new DelegateCommand(ManageItems);
             RemoveItemCommand = new DelegateCommand<MediaEditModel>(RemoveItem);
+
+            _eventAggregator.GetEvent<MediaLibraryLoadedEvent>().Subscribe(OnLibraryLoaded);
         }
 
-        private void OpenDetail(PersonalListEditModel list)
+        private void OnLibraryLoaded(ObservableCollection<MediaEditModel> items)
         {
-            SelectedList = list;
-            DetailName = list.Name;
-            DetailDesc = list.Description;
-            RefreshDetailItems();
-        }
-
-        private void CloseDetail()
-        {
-            SelectedList = null;
+            AllItems.Clear();
+            AllItems.AddRange(items);
         }
 
         private void RefreshDetailItems()
         {
+            DetailItems.Clear();
             if (SelectedList == null || AllItems == null) return;
 
-            var itemsInList = AllItems
-                .Where(item => SelectedList.Items.Contains(item))
-                .ToList();
+            // Находим полные объекты MediaEditModel на основе ID, сохраненных в списке
+            // (Предполагаем, что SelectedList.Items содержит хотя бы ID корректно)
+            // Но лучше полагаться на поиск в AllItems по ID
 
-            DetailItems.Clear();
-            foreach (var item in itemsInList)
-                DetailItems.Add(item);
+            var ids = SelectedList.Items.Select(x => x.Id).ToHashSet();
+
+            var itemsToShow = AllItems.Where(x => ids.Contains(x.Id)).ToList();
+
+            DetailItems.AddRange(itemsToShow);
         }
 
         private async void CreateList()
@@ -151,52 +165,45 @@ namespace MainComponents.ViewModels
 
         private async void ManageItems()
         {
-            if (SelectedList == null)
-                return;
+            if (SelectedList == null) return;
 
-            // 1. Подготовка параметров для диалога
+            // Передаем AllItems и список ID текущих элементов
+            var currentIds = SelectedList.Items.Select(x => x.Id).ToList();
             var parameters = new DialogParameters
             {
                 {"allItems", AllItems},
-                {"currentIds", SelectedList.ItemIds.ToList()}
+                {"currentIds", currentIds}
             };
 
-            // 2. Открытие диалога и ожидание результата
             var result = await _dialogService.ShowDialogAsync("ListItemsView", parameters);
 
-            if (result.Result != ButtonResult.OK)
-                return;
-
-            // 3. Получение выбранных ID из результата
-            var selectedIds = result.Parameters.GetValue<List<Guid>>("selectedIds");
-            if (selectedIds == null || !selectedIds.Any())
+            if (result.Result == ButtonResult.OK)
             {
-                SelectedList.Items = new ObservableCollection<MediaEditModel>(); // очищаем список
-                RefreshDetailItems();
-                return;
-            }
+                var selectedIds = result.Parameters.GetValue<List<Guid>>("selectedIds");
 
-            // 4. Оптимизированный поиск соответствующих MediaEditModel
-            var idSet = new HashSet<Guid>(selectedIds); // O(1) поиск
-            var selectedItems = AllItems
-                .Where(item => idSet.Contains(item.Id))
-                .Select(item => new MediaEditModel
+                // Обновляем SelectedList.Items на основе выбранных ID
+                SelectedList.Items.Clear();
+                if (selectedIds != null)
                 {
-                    Id = item.Id,
-                    Title = item.Title
-                    // Добавьте другие поля, если нужно
-                })
-                .ToList();
+                    var newItems = AllItems.Where(x => selectedIds.Contains(x.Id)).ToList();
+                    SelectedList.Items.AddRange(newItems);
+                }
 
-            // 5. Обновление коллекции
-            SelectedList.Items = new ObservableCollection<MediaEditModel>(selectedItems);
-            RefreshDetailItems();
+                RefreshDetailItems();
+            }
         }
 
         private void RemoveItem(MediaEditModel item)
         {
-            SelectedList.Items.Remove(item);
-            RefreshDetailItems();
+            if (SelectedList == null) return;
+
+            // Удаляем по ID, чтобы точно найти нужный объект
+            var itemInList = SelectedList.Items.FirstOrDefault(x => x.Id == item.Id);
+            if (itemInList != null)
+            {
+                SelectedList.Items.Remove(itemInList);
+                RefreshDetailItems();
+            }
         }
     }
 }

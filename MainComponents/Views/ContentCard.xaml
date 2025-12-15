@@ -1,18 +1,16 @@
 ﻿<UserControl x:Class="MainComponents.Views.ContentCard"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:helpers="clr-namespace:Infrastructure.Converter;assembly=Infrastructure"
-             mc:Ignorable="d" 
-             d:DesignHeight="250" d:DesignWidth="300">
+             x:Name="CardRoot">
+    <!-- Даем имя корню для удобства -->
 
     <UserControl.Resources>
         <helpers:TypeToIconConverter x:Key="TypeIconConv"/>
         <helpers:StatusToBrushConverter x:Key="StatusColorConv"/>
         <helpers:StringToVisibilityConverter x:Key="StringToVisConv"/>
 
-        <!-- Стиль для кнопок-иконок (Ghost button) -->
+        <!-- Стиль для кнопок -->
         <Style x:Key="GhostBtn" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -31,106 +29,78 @@
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#F3F4F6"/>
-                    <!-- Hover gray -->
                 </Trigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
-    <!-- Основной контейнер карточки -->
     <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Margin="5">
-        <Border.Effect>
-            <!-- Тень при наведении реализуется сложнее в чистом XAML, оставим статичную -->
-            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.05" Color="Black"/>
-        </Border.Effect>
-
         <Grid Margin="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <!-- Header -->
                 <RowDefinition Height="*"/>
-                <!-- Content -->
                 <RowDefinition Height="Auto"/>
-                <!-- Footer Info -->
             </Grid.RowDefinitions>
 
             <!-- HEADER -->
             <Grid Grid.Row="0" Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Icon -->
                     <ColumnDefinition Width="*"/>
-                    <!-- Titles -->
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Actions -->
                 </Grid.ColumnDefinitions>
 
-                <!-- Icon Box -->
+                <!-- Icon: DataContext здесь - это MediaEditModel -->
                 <Border Grid.Column="0" Width="36" Height="36" Background="#F3F4F6" CornerRadius="6" VerticalAlignment="Top" Margin="0,0,10,0">
-                    <TextBlock Text="{Binding Item.Type, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TypeIconConv}}" 
+                    <TextBlock Text="{Binding Type, Converter={StaticResource TypeIconConv}}" 
                                HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
                 </Border>
 
                 <!-- Titles -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                    <TextBlock Text="{Binding Item.Title, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                               FontWeight="SemiBold" FontSize="16" TextTrimming="CharacterEllipsis"/>
-
-                    <TextBlock Text="{Binding Item.OriginalTitle, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                               FontSize="12" Foreground="Gray" TextTrimming="CharacterEllipsis" 
-                               Visibility="{Binding Item.OriginalTitle, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource StringToVisConv}}"/>
-
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding OriginalTitle}" FontSize="12" Foreground="Gray" TextTrimming="CharacterEllipsis" 
+                               Visibility="{Binding OriginalTitle, Converter={StaticResource StringToVisConv}}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                        <TextBlock Text="{Binding Item.Year, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="Gray" FontSize="12"/>
+                        <TextBlock Text="{Binding Year}" Foreground="Gray" FontSize="12"/>
                         <TextBlock Text=" • " Foreground="Gray" FontSize="12" Margin="4,0"/>
-                        <TextBlock Text="{Binding Item.Country, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="Gray" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Country}" Foreground="Gray" FontSize="12" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Action Buttons -->
+                <!-- Actions: Биндимся к DependencyProperties самого контрола -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
-                    <Button Content="👁" Style="{StaticResource GhostBtn}" ToolTip="View Detail" Command="{Binding ViewDetailCommand}"/>
-                    <Button Content="✎" Style="{StaticResource GhostBtn}" ToolTip="Edit" Command="{Binding EditCommand}"/>
-                    <Button Content="🗑" Style="{StaticResource GhostBtn}" Foreground="#EF4444" ToolTip="Delete" Command="{Binding DeleteCommand}"/>
+                    <Button Content="👁" Style="{StaticResource GhostBtn}" ToolTip="View Detail" 
+                            Command="{Binding ViewDetailCommand, ElementName=CardRoot}" 
+                            CommandParameter="{Binding}"/>
+                    <Button Content="✎" Style="{StaticResource GhostBtn}" ToolTip="Edit" 
+                            Command="{Binding EditCommand, ElementName=CardRoot}" 
+                            CommandParameter="{Binding}"/>
+                    <Button Content="🗑" Style="{StaticResource GhostBtn}" Foreground="#EF4444" ToolTip="Delete" 
+                            Command="{Binding DeleteCommand, ElementName=CardRoot}" 
+                            CommandParameter="{Binding}"/>
                 </StackPanel>
             </Grid>
 
             <!-- CONTENT -->
             <StackPanel Grid.Row="1">
-                <!-- Badges Row -->
                 <WrapPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <!-- Status Badge -->
-                    <Border Background="{Binding Item.Status, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource StatusColorConv}}" 
+                    <Border Background="{Binding Status, Converter={StaticResource StatusColorConv}}" 
                             CornerRadius="10" Padding="8,2" Margin="0,0,5,5">
-                        <TextBlock Text="{Binding Item.Status, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Status}" Foreground="White" FontSize="11" FontWeight="Bold"/>
                     </Border>
-
-                    <!-- Official Rating Badge -->
                     <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,5,5"
-                            Visibility="{Binding Item.OfficialRating, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource StringToVisConv}}">
-                        <TextBlock Text="{Binding Item.OfficialRating, RelativeSource={RelativeSource AncestorType=UserControl}}" FontSize="11"/>
+                            Visibility="{Binding OfficialRating, Converter={StaticResource StringToVisConv}}">
+                        <TextBlock Text="{Binding OfficialRating}" FontSize="11"/>
                     </Border>
                 </WrapPanel>
 
-                <!-- Tags (В React это tags.map) -->
-                <!-- В WPF мы покажем теги простым текстом для простоты, т.к. ItemsControl внутри UserControl требует сложной настройки источника -->
-                <TextBlock Text="{Binding Item.TagsString, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                           Foreground="#2563EB" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
-
-                <!-- Synopsis -->
-                <TextBlock Text="{Binding Item.Synopsis, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                           TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="40" Foreground="#374151" FontSize="13" Margin="0,0,0,8"/>
-
-                <!-- Notes Box -->
-                <Border Background="#F3F4F6" CornerRadius="4" Padding="6" 
-                        Visibility="{Binding Item.Notes, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource StringToVisConv}}">
-                    <TextBlock Text="{Binding Item.Notes, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                               FontStyle="Italic" Foreground="Gray" FontSize="11" TextTrimming="CharacterEllipsis"/>
-                </Border>
+                <TextBlock Text="{Binding TagsInput}" Foreground="#2563EB" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                <TextBlock Text="{Binding Synopsis}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="40" Foreground="#374151" FontSize="13" Margin="0,0,0,8"/>
             </StackPanel>
 
             <!-- FOOTER -->
-            <TextBlock Grid.Row="2" Text="{Binding Item.UpdatedDate, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Updated: {0}'}" 
+            <TextBlock Grid.Row="2" Text="{Binding UpdatedDate, StringFormat='Updated: {0}'}" 
                        FontSize="10" Foreground="#9CA3AF" HorizontalAlignment="Right" Margin="0,10,0,0"/>
         </Grid>
     </Border>

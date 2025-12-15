@@ -1,23 +1,17 @@
-<UserControl x:Class="MediaTracker.Views.StatsOverview"
+<UserControl x:Class="MainComponents.Views.StatsOverview"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="150" d:DesignWidth="1000">
-
-    <!-- Список карточек -->
     <ItemsControl ItemsSource="{Binding StatCards, RelativeSource={RelativeSource AncestorType=UserControl}}">
 
-        <!-- Расположение: WrapPanel (плитка) -->
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
                 <WrapPanel Orientation="Horizontal" ItemWidth="160"/>
-                <!-- ItemWidth фиксирует ширину карточек -->
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
-
-        <!-- Шаблон одной карточки -->
         <ItemsControl.ItemTemplate>
             <DataTemplate>
                 <Border Background="White" CornerRadius="12" Margin="0,0,15,15" Height="80" 
@@ -31,22 +25,14 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
-                        <!-- Текст и Число -->
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="{Binding Label}" Foreground="#64748B" FontSize="12" FontWeight="Medium"/>
                             <TextBlock Text="{Binding Count}" Foreground="#0F172A" FontSize="20" FontWeight="Bold" Margin="0,2,0,0"/>
                         </StackPanel>
-
-                        <!-- Иконка с цветным фоном -->
                         <Border Grid.Column="1" Width="36" Height="36" CornerRadius="8" Background="{Binding BackgroundColor}" VerticalAlignment="Center">
-                            <!-- Геометрия иконки (Path) -->
                             <Path Data="{Binding IconGeometry}" Fill="{Binding ForegroundColor}" Stretch="Uniform" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
-
-                    <!-- Нижняя цветная полоска (как в React group-hover) -->
-                    <!-- В WPF проще сделать её видимой всегда или через триггер, сделаем легкую полоску снизу -->
                     <Border.Triggers>
                         <EventTrigger RoutedEvent="MouseEnter">
                             <BeginStoryboard>

@@ -12,7 +12,14 @@ namespace MainComponents.ViewModels
         public ObservableCollection<MediaEditModel> Items
         {
             get => _items;
-            set => SetProperty(ref _items, value, OnItemsChanged);
+            set
+            {
+                // При смене всей коллекции пересчитываем и подписываемся
+                if (SetProperty(ref _items, value))
+                {
+                    OnItemsChanged();
+                }
+            }
         }
 
         // === Данные для отображения ===

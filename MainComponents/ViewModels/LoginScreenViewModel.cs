@@ -1,5 +1,4 @@
-﻿using System.Reflection.Metadata;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using Infrastructure.Interface;
 using MainComponents.Events;
 

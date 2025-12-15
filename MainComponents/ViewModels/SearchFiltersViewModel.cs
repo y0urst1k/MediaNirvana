@@ -7,6 +7,14 @@ namespace MainComponents.ViewModels
     {
         private readonly IEventAggregator _eventAggregator;
 
+        // Добавляем SetProperty для AvailableTags
+        private IEnumerable<string> _availableTags;
+        public IEnumerable<string> AvailableTags
+        {
+            get => _availableTags;
+            set => SetProperty(ref _availableTags, value);
+        }
+
         // === Свойства фильтров ===
         private string _searchQuery = "";
         public string SearchQuery
@@ -53,7 +61,6 @@ namespace MainComponents.ViewModels
         }
         public IEnumerable<string> Types { get; } = new[] { "All", "Book", "Movie", "Series", "Game" };
         public IEnumerable<string> Years { get; } = new[] { "All", "2024", "2023", "2022", "Old" };
-        public IEnumerable<string> AvailableTags { get; set; }
 
         // === Флаг активных фильтров ===
         private bool _hasActiveFilters;
@@ -68,6 +75,7 @@ namespace MainComponents.ViewModels
 
         public SearchFiltersViewModel(IEventAggregator eventAggregator)
         {
+            _eventAggregator = eventAggregator;
             ClearCommand = new DelegateCommand(ExecuteClear);
         }
 

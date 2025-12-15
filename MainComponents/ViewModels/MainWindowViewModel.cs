@@ -12,7 +12,6 @@ namespace MainComponents.ViewModels
     {
         private readonly ISessionService _sessionService;
         private readonly MediaEditService _mediaEditService;
-        private readonly ContentTrackerViewModel _contentTrackerVm;
         private readonly IDialogService _dialogService;
         private readonly IEventAggregator _eventAggregator;
         // === Данные приложения ===
@@ -82,7 +81,7 @@ namespace MainComponents.ViewModels
         public DelegateCommand<MediaEditModel> AddMediaToListCommand { get; }
         public DelegateCommand<MediaEditModel> RemoveMediaFromListCommand { get; }
 
-        public MainWindowViewModel(ISessionService sessionService, MediaEditService mediaEditService, IEventAggregator eventAggregator, IDialogService dialogService, ContentTrackerViewModel contentTrackerVm)
+        public MainWindowViewModel(ISessionService sessionService, MediaEditService mediaEditService, IEventAggregator eventAggregator, IDialogService dialogService)
         {
             _sessionService = sessionService;
             _mediaEditService = mediaEditService;
@@ -103,17 +102,24 @@ namespace MainComponents.ViewModels
 
             SubscribeToEvents();
 
-            _contentTrackerVm.SetSourceItems(MediaCollection);
-
             // Изначально показываем экран входа
             IsLoginVisible = true;
             IsMainAppVisible = false;
         }
 
         // === Обработчики событий ===
-        private void OnLoginSuccess(string username)
+        private async void OnLoginSuccess(string username)
         {
             CurrentUsername = username;
+
+            // 1. Загружаем данные из сервиса
+            var items = await _mediaEditService.GetAllMediaItemsAsync(_sessionService.CurrentUser.Id);
+            MediaCollection.Clear();
+            MediaCollection.AddRange(items);
+
+            // 2. Рассылаем данные всем подписчикам (Sidebar, Detail, Tracker)
+            _eventAggregator.GetEvent<MediaLibraryLoadedEvent>().Publish(MediaCollection);
+
             IsLoginVisible = false;
             IsMainAppVisible = true;
             SwitchScreen("Library");
@@ -165,17 +171,40 @@ namespace MainComponents.ViewModels
 
         private void OnViewMediaDetailRequested(MediaEditModel model)
         {
-            SelectedItem = model;
-            SwitchScreen(model == null ? "Library" : "Detail");
+            if (model != null)
+            {
+                SelectedItem = model;
+                SwitchScreen("Detail");
+            }
+            else
+            {
+                // Если пришел null — это сигнал "Назад"
+                BackToLibrary();
+            }
         }
 
         // === Бизнес-логика ===
         private void SubscribeToEvents()
         {
-            _eventAggregator.GetEvent<LoginSuccessEvent>().Subscribe(OnLoginSuccess);
-            _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Subscribe(async item => await OnDeleteMediaRequested(item));
-            _eventAggregator.GetEvent<ItemUpdatedEvent>().Subscribe(async item => await OnItemUpdated(item));
+            // Навигация (Library, Lists)
+            _eventAggregator.GetEvent<NavigateToEvent>().Subscribe(screenName =>
+            {
+                if (screenName == "ContentTracker") SwitchScreen("Library");
+                else if (screenName == "ListScreen") SwitchScreen("Lists");
+                else SwitchScreen(screenName);
+            });
+
+            // Открытие/Закрытие деталей (ОДНА подписка)
             _eventAggregator.GetEvent<ViewMediaDetailEvent>().Subscribe(OnViewMediaDetailRequested);
+
+            // Остальные события
+            _eventAggregator.GetEvent<LoginSuccessEvent>().Subscribe(OnLoginSuccess);
+
+            // Для async методов внутри Subscribe лучше использовать такую конструкцию, 
+            // чтобы исключения не терялись, хотя ваш вариант тоже сработает.
+            _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Subscribe(async id => await OnDeleteMediaRequested(id));
+            _eventAggregator.GetEvent<ItemUpdatedEvent>().Subscribe(async item => await OnItemUpdated(item));
+
             _eventAggregator.GetEvent<AddMediaRequestedEvent>().Subscribe(OnAddMediaRequested);
         }
 

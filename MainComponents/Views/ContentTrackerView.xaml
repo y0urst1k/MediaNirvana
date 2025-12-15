@@ -3,8 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:MainComponents.Views;assembly=MainComponents"
+             xmlns:local="clr-namespace:MainComponents.Views"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors" 
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
              d:DesignHeight="700" d:DesignWidth="1000">
 
@@ -85,21 +87,7 @@
 
 			<!-- ROW 1: SEARCH FILTERS (Наш новый компонент) -->
 			<!-- Связываем (Bind) свойства этого компонента с DependencyProperties текущего View -->
-            <local:SearchFilters
-                Grid.Row="2" Margin="0,0,0,20"
-                SearchQuery="{Binding SearchText, Mode=TwoWay}"
-                SelectedType="{Binding SelectedType, Mode=TwoWay}"
-                SelectedYear="{Binding SelectedYear, Mode=TwoWay}"
-                SelectedTag="{Binding SelectedTag, Mode=TwoWay}"
-                AvailableTags="{Binding TagList}">
-
-                <!-- Обработка события ClearRequested через триггер -->
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="ClearRequested">
-                        <i:InvokeCommandAction Command="{Binding ClearFiltersCommand}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </local:SearchFilters>
+            <local:SearchFilters Grid.Row="2" Margin="0,0,0,20" DataContext="{Binding FiltersVM}" />
 
             <!-- ROW 2: STATUS TABS -->
 			<WrapPanel Grid.Row="2" Margin="0,0,0,24">
@@ -120,15 +108,14 @@
 
 			<!-- ROW 0.5: STATS -->
 			<!-- не уверен в расположении этой фигни -->
-            <local:StatsOverview Grid.Row="1" Items="{Binding Items}" Margin="0,0,0,20"/>
-            />
+            <local:StatsOverview 
+            Grid.Row="1" 
+            Margin="0,0,0,20"
+            DataContext="{Binding StatsVM}" />
 
-			<!-- ROW 3: LIST -->
+            <!-- ROW 3: LIST -->
 			<!-- Важно: ItemsSource привязан к FilteredView, а не к сырому Items -->
-            <local:ContentList
-                Grid.Row="3"
-                Items="{Binding FilteredView}" ItemDeleted="OnItemDeleted" ItemViewDetail="OnItemDetail"
-            />
+            <local:ContentList Items="{Binding FilteredView}" ViewDetailCommand="{Binding DetailCommand}" EditCommand="{Binding EditCommand}" DeleteCommand="{Binding DeleteCommand}" />
         </Grid>
 	</Border>
 </UserControl>
