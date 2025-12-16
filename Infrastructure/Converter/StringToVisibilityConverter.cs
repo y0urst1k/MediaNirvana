@@ -8,10 +8,21 @@ namespace Infrastructure.Converter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (string.IsNullOrEmpty(value as string))
-                return Visibility.Collapsed; // Скрыть
+            // Если значение null или параметр null — скрываем
+            if (value == null || parameter == null)
+                return Visibility.Collapsed;
 
-            return Visibility.Visible; // Показать
+            string currentScreen = value.ToString();
+            string targetScreen = parameter.ToString();
+
+            // Сравнение без учета регистра (Library == library)
+            if (string.Equals(currentScreen, targetScreen, StringComparison.OrdinalIgnoreCase))
+            {
+                return Visibility.Visible;
+            }
+
+            // ВАЖНО: Если не совпало — СКРЫВАЕМ
+            return Visibility.Collapsed;
         }
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
     }

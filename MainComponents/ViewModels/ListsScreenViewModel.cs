@@ -4,11 +4,10 @@ using Infrastructure.DTO;
 using Infrastructure.Interface;
 using Infrastructure.Service;
 using MainComponents.Events;
-using Prism.Events;
 
 namespace MainComponents.ViewModels
 {
-    public class ListScreenViewModel : BindableBase
+    public class ListsScreenViewModel : BindableBase
     {
         private readonly IDialogService _dialogService;
         private readonly IEventAggregator _eventAggregator;
@@ -69,7 +68,7 @@ namespace MainComponents.ViewModels
         public DelegateCommand<MediaEditModel> RemoveItemCommand { get; }
 
 
-        public ListScreenViewModel(IDialogService dialogService, IEventAggregator eventAggregator, PersonalListEditModelService listEditService, ISessionService sessionService)
+        public ListsScreenViewModel(IDialogService dialogService, IEventAggregator eventAggregator, PersonalListEditModelService listEditService, ISessionService sessionService)
         {
             _dialogService = dialogService;
             _eventAggregator = eventAggregator;
@@ -96,12 +95,6 @@ namespace MainComponents.ViewModels
             {
                 Lists = lists; // Получаем ссылку на общую коллекцию
             });
-        }
-
-        private void OnLibraryLoaded(ObservableCollection<MediaEditModel> items)
-        {
-            AllItems.Clear();
-            AllItems.AddRange(items);
         }
 
         private void RefreshDetailItems()

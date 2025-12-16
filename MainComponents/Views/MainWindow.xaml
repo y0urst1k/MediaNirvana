@@ -61,81 +61,21 @@
 					<!-- ЭКРАН 1: CONTENT TRACKER (Библиотека) -->
                     <Grid Visibility="{Binding ActiveScreen, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Library}">
 						<!-- Теперь вся логика фильтрации и отображения инкапсулирована в ContentTrackerView.Мы просто передаем данные (Items) и слушаем события.-->
-						<views:ContentTrackerView
+						<views:ContentTracker
 							prism:ViewModelLocator.AutoWireViewModel="True"
-							Margin="0,0,0,20"
-    />
+							Margin="0,0,0,20"/>
 					</Grid>
 
                     <Grid x:Name="ListsScreen" Visibility="{Binding ActiveScreen, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Lists}">
-                        <views:ListsScreen prism:ViewModelLocator.AutoWireViewModel="True"/>
+                        <views:ListsScreen  prism:ViewModelLocator.AutoWireViewModel="True"/>
 					</Grid>
 
 					<!-- ЭКРАН 2: DETAIL VIEW (Детали) -->
                     <Grid Visibility="{Binding ActiveScreen, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Detail}" Background="#F3F4F6">
-						<StackPanel>
-                            <Button Content="← Back to Library" Command="{Binding BackToLibraryCommand}" Background="Transparent" BorderThickness="0" Foreground="#4B5563" HorizontalAlignment="Left" Margin="0,0,0,20" Cursor="Hand"/>
-
-							<Border Background="White" Padding="30" CornerRadius="12">
-								<StackPanel>
-									<StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-										<TextBlock Text="{Binding SelectedItem.Type}" Foreground="#2563EB" FontWeight="Bold"/>
-										<TextBlock Text=" • " Foreground="Gray"/>
-										<TextBlock Text="{Binding SelectedItem.Year}" Foreground="Gray"/>
-									</StackPanel>
-
-									<TextBlock Text="{Binding SelectedItem.Title}" FontSize="32" FontWeight="Bold" Margin="0,0,0,20"/>
-
-									<Grid Margin="0,0,0,20">
-										<Grid.ColumnDefinitions>
-											<ColumnDefinition Width="*"/>
-											<ColumnDefinition Width="*"/>
-										</Grid.ColumnDefinitions>
-										<StackPanel Grid.Column="0">
-											<TextBlock Text="Status" Foreground="Gray" Margin="0,0,0,5"/>
-											<ComboBox SelectedItem="{Binding SelectedItem.Status}" ItemsSource="{Binding StatusOptions}" HorizontalAlignment="Left" Width="150"/>
-										</StackPanel>
-										<StackPanel Grid.Column="1">
-											<TextBlock Text="Your Rating" Foreground="Gray" Margin="0,0,0,5"/>
-											<TextBlock Text="{Binding SelectedItem.Rating, StringFormat='{}{0}/10'}" FontWeight="Bold"/>
-										</StackPanel>
-									</Grid>
-
-									<TextBlock Text="Notes" FontWeight="Bold" Margin="0,10,0,5"/>
-									<TextBox Text="{Binding SelectedItem.Notes, UpdateSourceTrigger=PropertyChanged}" Height="80" AcceptsReturn="True" Padding="5" BorderBrush="#E5E7EB"/>
-
-                                    <Button Content="Delete Item" Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" Padding="15,10" HorizontalAlignment="Right" Margin="0,20,0,0" Command="{Binding DeleteItemCommand}">
-										<Button.Resources>
-											<Style TargetType="Border">
-												<Setter Property="CornerRadius" Value="6"/>
-											</Style>
-										</Button.Resources>
-									</Button>
-								</StackPanel>
-							</Border>
-						</StackPanel>
-					</Grid>
+                        <views:MediaDetail prism:ViewModelLocator.AutoWireViewModel="True"/>
+                    </Grid>
 
 					<!-- ЭКРАН 3: LISTS SCREEN (Списки) -->
-                    <Grid Visibility="{Binding ActiveScreen, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Lists}">
-						<StackPanel>
-							<TextBlock Text="My Personal Lists" FontSize="28" FontWeight="Bold" Margin="0,0,0,20"/>
-							<ItemsControl ItemsSource="{Binding Lists}">
-								<ItemsControl.ItemTemplate>
-									<DataTemplate>
-										<Border Background="White" Margin="0,0,0,15" Padding="20" CornerRadius="8">
-											<StackPanel>
-												<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="18"/>
-												<TextBlock Text="{Binding Description}" Foreground="Gray" Margin="0,5"/>
-												<TextBlock Text="{Binding Type, StringFormat='Type: {0}'}" FontSize="12" Foreground="#3B82F6"/>
-											</StackPanel>
-										</Border>
-									</DataTemplate>
-								</ItemsControl.ItemTemplate>
-							</ItemsControl>
-						</StackPanel>
-					</Grid>
-
 				</Grid>
 			</Border>
 		</Grid>

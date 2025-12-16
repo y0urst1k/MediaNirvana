@@ -2,9 +2,9 @@
 
 namespace MainComponents.Views
 {
-    public partial class ContentTrackerView : UserControl
+    public partial class ContentTracker : UserControl
     {
-        public ContentTrackerView()
+        public ContentTracker()
         {
             InitializeComponent();
         }

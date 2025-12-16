@@ -20,11 +20,11 @@ namespace MainComponents
             // Основные экраны
             containerRegistry.RegisterForNavigation<LoginScreen, LoginScreenViewModel>();
             containerRegistry.RegisterForNavigation<MediaSidebar, MediaSidebarViewModel>();
-            containerRegistry.RegisterForNavigation<ContentTrackerView, ContentTrackerViewModel>();
+            containerRegistry.RegisterForNavigation<ContentTracker, ContentTrackerViewModel>();
 
             // Экраны списков и деталей
-            containerRegistry.RegisterForNavigation<ListsScreen, ListScreenViewModel>();
-            containerRegistry.RegisterForNavigation<MediaDetailView, MediaDetailViewModel>();
+            containerRegistry.RegisterForNavigation<ListsScreen, ListsScreenViewModel>();
+            containerRegistry.RegisterForNavigation<MediaDetail, MediaDetailViewModel>();
 
             // Дочерние компоненты (если у них есть свои VM, которые требуют инъекций)
             // StatsOverview и SearchFilters используют вложенные VM в ContentTrackerViewModel,

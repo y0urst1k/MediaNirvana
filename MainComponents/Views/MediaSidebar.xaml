@@ -80,7 +80,7 @@
                              CommandParameter="Library" x:Name="LibBtn"/>
                 <RadioButton Content="📋  My Lists" GroupName="NavGroup" Style="{StaticResource NavBtnStyle}" 
                             Command="{Binding NavigateCommand}" 
-                             CommandParameter="Lists" Margin="0,4,0,0"/>
+                            CommandParameter="Lists" Margin="0,4,0,0"/>
             </StackPanel>
 
             <!-- DIVIDER -->

@@ -2,9 +2,9 @@ using System.Windows.Controls;
 
 namespace MainComponents.Views
 {
-    public partial class MediaDetailView : UserControl
+    public partial class MediaDetail : UserControl
     {
-        public MediaDetailView()
+        public MediaDetail()
         {
             InitializeComponent();
         }

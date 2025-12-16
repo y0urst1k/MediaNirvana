@@ -197,9 +197,7 @@ namespace MainComponents.ViewModels
             // Навигация (Library, Lists)
             _eventAggregator.GetEvent<NavigateToEvent>().Subscribe(screenName =>
             {
-                if (screenName == "ContentTracker") SwitchScreen("Library");
-                else if (screenName == "ListScreen") SwitchScreen("Lists");
-                else SwitchScreen(screenName);
+                SwitchScreen(screenName);
             });
 
             // Открытие/Закрытие деталей (ОДНА подписка)

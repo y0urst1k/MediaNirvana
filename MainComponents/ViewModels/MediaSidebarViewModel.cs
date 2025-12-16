@@ -222,22 +222,7 @@ namespace MainComponents.ViewModels
         }
 
         // === Обработчики команд ===
-        private void OnNavigate(string screen)
-        {
-            switch (screen)
-            {
-                case "Library":
-                    _eventAggregator.GetEvent<NavigateToEvent>().Publish("ContentTracker");
-                    break;
-                case "Lists":
-                    _eventAggregator.GetEvent<NavigateToEvent>().Publish("ListScreen");
-                    break;
-                // Добавьте другие экраны по необходимости
-                default:
-                    _eventAggregator.GetEvent<NavigateToEvent>().Publish(screen);
-                    break;
-            }
-        }
+        private void OnNavigate(string screen) => _eventAggregator.GetEvent<NavigateToEvent>().Publish(screen);
 
         private void OnCategoryToggle(SidebarCategory category)
         {
