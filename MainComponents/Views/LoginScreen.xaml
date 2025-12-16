@@ -96,7 +96,7 @@
                     <Label Content="Пароль" Foreground="#0F172A" FontWeight="Medium" Margin="0,0,0,5" Padding="0"/>
                     <PasswordBox x:Name="PassBox" Margin="0,0,0,25" PasswordChanged="PassBox_PasswordChanged"/>
 
-                    <Button Content="Войти" Command="{Binding LoginCommand}" IsDefault="True"/>
+                    <Button Content="Войти" Command="{Binding LoginCommand}" CommandParameter="{Binding ElementName=PassBox}" IsDefault="True"/>
                 </StackPanel>
             </StackPanel>
         </Border>

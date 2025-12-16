@@ -13,25 +13,7 @@ namespace Infrastructure
     {
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            var seeder = containerProvider.Resolve<DatabaseSeedingService>();
 
-            // Запускаем заполнение БД. 
-            // Внимание: OnInitialized выполняется синхронно при старте.
-            // Чтобы не блокировать UI (Splash Screen), лучше запустить это в фоне, 
-            // но EF Core первый запрос все равно будет долгим (создание модели).
-            // Для Seed данных синхронный вызов допустим, если данных немного.
-
-            try
-            {
-                // Используем .Wait() или .GetAwaiter().GetResult(), так как интерфейс IModule синхронный.
-                // Либо Task.Run(() => seeder.SeedAsync()).Wait();
-                seeder.SeedAsync().GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                // Логируем ошибку, но не роняем приложение, если Seed не критичен
-                System.Diagnostics.Debug.WriteLine($"DB Seed Failed: {ex}");
-            }
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -61,12 +43,13 @@ namespace Infrastructure
             containerRegistry.RegisterSingleton<IService<MediaInstance>, Service<MediaInstance>>();
             containerRegistry.RegisterSingleton<IService<Relationship>, Service<Relationship>>();
             containerRegistry.RegisterSingleton<IService<Tag>, Service<Tag>>();
+            containerRegistry.RegisterSingleton<ISessionService, SessionService>();
 
             // ДОБАВЛЕНО: Сервис для связей списков
             containerRegistry.RegisterSingleton<IService<UserLabelLink>, Service<UserLabelLink>>();
 
             // 5. Фасадные сервисы (DTO Logic)
-            containerRegistry.RegisterSingleton<ISessionService, SessionService>();
+            
             containerRegistry.RegisterSingleton<TagService>();
             containerRegistry.RegisterSingleton<MediaEditService>();
             containerRegistry.RegisterSingleton<PersonalListEditModelService>(); // <-- Не забудьте это!
