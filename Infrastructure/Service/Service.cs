@@ -9,7 +9,7 @@ namespace Infrastructure.Service
 {
     public class Service<T> : IService<T> where T : Entity, new()
     {
-        private readonly IRepository<T> _repo;
+        protected readonly IRepository<T> _repo;
         private readonly ILogger<Service<T>> _logger;
         public Service(IRepository<T> repo, ILogger<Service<T>> logger)
         {

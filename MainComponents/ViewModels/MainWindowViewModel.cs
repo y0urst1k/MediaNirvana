@@ -12,6 +12,7 @@ namespace MainComponents.ViewModels
     {
         private readonly ISessionService _sessionService;
         private readonly MediaEditService _mediaEditService;
+        private readonly PersonalListEditModelService _listEditService;
         private readonly IDialogService _dialogService;
         private readonly IEventAggregator _eventAggregator;
         // === Данные приложения ===
@@ -81,10 +82,11 @@ namespace MainComponents.ViewModels
         public DelegateCommand<MediaEditModel> AddMediaToListCommand { get; }
         public DelegateCommand<MediaEditModel> RemoveMediaFromListCommand { get; }
 
-        public MainWindowViewModel(ISessionService sessionService, MediaEditService mediaEditService, IEventAggregator eventAggregator, IDialogService dialogService)
+        public MainWindowViewModel(ISessionService sessionService, MediaEditService mediaEditService, PersonalListEditModelService listEditService, IEventAggregator eventAggregator, IDialogService dialogService)
         {
             _sessionService = sessionService;
             _mediaEditService = mediaEditService;
+            _listEditService = listEditService;
             _eventAggregator = eventAggregator;
             _dialogService = dialogService;
 
@@ -111,14 +113,20 @@ namespace MainComponents.ViewModels
         private async void OnLoginSuccess(string username)
         {
             CurrentUsername = username;
+            var userId = _sessionService.CurrentUser.Id;
 
-            // 1. Загружаем данные из сервиса
-            var items = await _mediaEditService.GetAllMediaItemsAsync(_sessionService.CurrentUser.Id);
+            // 1. Загружаем Медиа
+            var items = await _mediaEditService.GetAllMediaItemsAsync(userId);
             MediaCollection.Clear();
             MediaCollection.AddRange(items);
-
-            // 2. Рассылаем данные всем подписчикам (Sidebar, Detail, Tracker)
             _eventAggregator.GetEvent<MediaLibraryLoadedEvent>().Publish(MediaCollection);
+
+            // 2. Загружаем Списки
+            var lists = await _listEditService.GetUserListsAsync(userId);
+            Lists.Clear();
+            Lists.AddRange(lists);
+            // Публикуем событие для ListScreenViewModel
+            _eventAggregator.GetEvent<ListsLoadedEvent>().Publish(Lists);
 
             IsLoginVisible = false;
             IsMainAppVisible = true;

@@ -14,10 +14,10 @@ namespace Dialogs
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterDialog<MessageBoxDialogView, MessageBoxDialogViewModel>();
-            containerRegistry.RegisterDialog<AddContentDialogView, AddContentDialogViewModel>();
-            containerRegistry.RegisterDialog<EditContentDialogView, EditContentDialogViewModel>();
-            containerRegistry.RegisterDialog<ListEditorDialogView, ListEditorDialogViewModel>();
-            containerRegistry.RegisterDialog<ListItemsDialogView, ListItemsDialogViewModel>();
+            containerRegistry.RegisterDialog<AddContentDialogView, AddContentDialogViewModel>("AddContentDialog");
+            containerRegistry.RegisterDialog<EditContentDialogView, EditContentDialogViewModel>("EditContentDialogView");
+            containerRegistry.RegisterDialog<ListEditorDialogView, ListEditorDialogViewModel>("ListEditorView");
+            containerRegistry.RegisterDialog<ListItemsDialogView, ListItemsDialogViewModel>("ListItemsView");
         }
     }
 }

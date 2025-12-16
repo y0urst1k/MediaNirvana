@@ -191,12 +191,6 @@ namespace MainComponents.ViewModels
             return true;
         }
 
-        // Вызывается при изменении любого фильтра
-        private void OnFilterChanged()
-        {
-            FilteredView?.Refresh();
-        }
-
         // Смена статуса (из RadioButton)
         public void SetStatusFilter(string status)
         {

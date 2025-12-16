@@ -1,7 +1,6 @@
 ﻿
 using MainComponents.ViewModels;
 using MainComponents.Views;
-using MediaTracker.Views;
 
 namespace MainComponents
 {
