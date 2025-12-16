@@ -200,7 +200,8 @@ namespace MainComponents.ViewModels
                     Type = type,
                     Label = GetLabelForType(type),
                     AllItems = new ObservableCollection<MediaEditModel>(itemsInCat),
-                    IsExpanded = expandedTypes.Contains(type)
+                    //IsExpanded = expandedTypes.Contains(type)
+                    IsExpanded = true
                 };
                 newCategories.Add(cat);
             }

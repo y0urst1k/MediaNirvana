@@ -1,4 +1,5 @@
-﻿using Infrastructure.DTO;
+﻿using System.ComponentModel;
+using Infrastructure.DTO;
 using Infrastructure.EF.Enum;
 
 namespace Dialogs.ViewModels
@@ -22,8 +23,18 @@ namespace Dialogs.ViewModels
         {
             List = new PersonalListEditModel();
 
+            List.PropertyChanged += (s, e) => SaveCommand.RaiseCanExecuteChanged();
+
             SaveCommand = new DelegateCommand(OnSave, CanSave);
             CancelCommand = new DelegateCommand(OnCancel);
+        }
+
+        private void OnListPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PersonalListEditModel.Name))
+            {
+                SaveCommand.RaiseCanExecuteChanged();
+            }
         }
 
         private bool CanSave() => !string.IsNullOrWhiteSpace(List.Name);
@@ -52,9 +63,17 @@ namespace Dialogs.ViewModels
         {
             if (parameters.ContainsKey("existingList"))
             {
+                // Отписываемся от старой
+                List.PropertyChanged -= OnListPropertyChanged;
+
                 List = parameters.GetValue<PersonalListEditModel>("existingList") ?? new PersonalListEditModel();
+
+                // Подписываемся на новую
+                List.PropertyChanged += OnListPropertyChanged;
+
+                // Уведомляем View, что свойство List изменилось целиком (если нет Fody/SetProperty)
+                RaisePropertyChanged(nameof(List));
             }
-            // Пересоздаём команды, чтобы обновить CanSave
             SaveCommand.RaiseCanExecuteChanged();
         }
         public bool CanCloseDialog() => true;

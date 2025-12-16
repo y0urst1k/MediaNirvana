@@ -7,21 +7,20 @@ namespace Infrastructure.Converter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) 
-                return null;
-            if (value is DateTimeOffset dto) 
+            if (value is DateTimeOffset dto)
+            {
                 return dto.DateTime;
+            }
             return null;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) 
-                return null;
-            if (!(value is DateTime dt)) 
-                return null;
-            var offset = TimeZoneInfo.Local.GetUtcOffset(dt);
-            return new DateTimeOffset(DateTime.SpecifyKind(dt, DateTimeKind.Unspecified), offset);
+            if (value is DateTime dt)
+            {
+                return new DateTimeOffset(dt);
+            }
+            return null;
         }
     }
 }

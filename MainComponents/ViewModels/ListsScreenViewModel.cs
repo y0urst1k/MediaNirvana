@@ -51,7 +51,7 @@ namespace MainComponents.ViewModels
             set => SetProperty(ref _isDetailVisible, value);
         }
 
-        private bool _isListVisible;
+        private bool _isListVisible = true;
         public bool IsListVisible
         {
             get => _isListVisible;

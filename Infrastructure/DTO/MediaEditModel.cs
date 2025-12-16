@@ -7,11 +7,19 @@ namespace Infrastructure.DTO
         public Guid Id { get; set; }
 
         // Поля из MediaItem
-        public string Title { get; set; } = null!;
+
+        private string _title;
+        public string Title
+        {
+            get => _title;
+            set => SetProperty(ref _title, value);
+        }
         public string? OriginalTitle { get; set; }
+
         public int? Year { get; set; }
         public string? Country { get; set; }
-        public MediaType Type { get; set; }
+        public MediaType _type;
+        public MediaType Type { get => _type; set => SetProperty(ref _type, value); }
         public int? DurationMinutes { get; set; }
         public int? SeasonsCount { get; set; }
         public int? EpisodesCount { get; set; }
@@ -33,8 +41,10 @@ namespace Infrastructure.DTO
         public MediaSource? Source { get; set; }
         public DateTimeOffset? AcquisitionDate { get; set; }
         public string? Location { get; set; }
-        public bool HasPhysicalCopy { get; set; }
-        public bool HasDigitalCopy { get; set; }
+        public bool _hasPhysicalCopy;
+        public bool HasPhysicalCopy { get => _hasPhysicalCopy; set => SetProperty(ref _hasPhysicalCopy, value); }
+        public bool _hasDigitalCopy;
+        public bool HasDigitalCopy { get => _hasDigitalCopy; set => SetProperty(ref _hasDigitalCopy, value); }
 
         public double PurchasePrice { get; set; }
         public object Clone()

@@ -42,6 +42,9 @@ namespace Dialogs.ViewModels
             private set => SetProperty(ref _showInventoryDetails, value);
         }
 
+        public IEnumerable<MediaType> MediaTypes => Enum.GetValues(typeof(MediaType)).Cast<MediaType>();
+        public IEnumerable<InteractionStatus> InteractionStatuses => Enum.GetValues(typeof(InteractionStatus)).Cast<InteractionStatus>();
+
         // === Команды ===
         public DelegateCommand SaveCommand { get; }
         public DelegateCommand CancelCommand { get; }
@@ -74,13 +77,15 @@ namespace Dialogs.ViewModels
 
         private void OnModelPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            SaveCommand.RaiseCanExecuteChanged();
+
             switch (e.PropertyName)
             {
                 case nameof(MediaEditModel.Type):
                     UpdateVisibility();
                     break;
-                case nameof(MediaEditModel.Format):
-                case nameof(MediaEditModel.Source):
+                case nameof(MediaEditModel.HasPhysicalCopy):
+                case nameof(MediaEditModel.HasDigitalCopy):
                     UpdateInventoryVisibility();
                     break;
             }
@@ -95,7 +100,7 @@ namespace Dialogs.ViewModels
 
         private void UpdateInventoryVisibility()
         {
-            ShowInventoryDetails = (Model.Format.HasValue || Model.Source.HasValue);
+            ShowInventoryDetails = Model.HasPhysicalCopy || Model.HasDigitalCopy;
         }
 
         private bool CanSave()

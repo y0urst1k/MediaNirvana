@@ -24,7 +24,7 @@
 					<TextBlock Text="Lists &amp; Collections" FontSize="24" FontWeight="Bold"/>
 					<TextBlock Text="Organize your content" Foreground="Gray"/>
 				</StackPanel>
-                <Button Content="+ Create List" Command="{Binding CreateListCommand}" DockPanel.Dock="Right" Padding="10,5" Background="Black" Foreground="Black"/>
+                <Button Content="+ Create List" Command="{Binding CreateListCommand}" DockPanel.Dock="Right" Padding="10,5" Background="Black" Foreground="White"/>
 			</DockPanel>
 
 			<ScrollViewer Grid.Row="1">
