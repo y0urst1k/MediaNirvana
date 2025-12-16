@@ -56,12 +56,20 @@ namespace Dialogs.ViewModels
             _mediaEditService = mediaEditService;
             _sessionService = sessionService;
 
+            Model = new MediaEditModel
+            {
+                StartDate = DateTimeOffset.Now,
+                Type = MediaType.Film
+            };
+
             // Команды
             SaveCommand = new DelegateCommand(OnSave, CanSave);
             CancelCommand = new DelegateCommand(OnCancel);
 
             // Подписываемся на изменения Model
             Model.PropertyChanged += OnModelPropertyChanged;
+
+            UpdateVisibility();
         }
 
         private void OnModelPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -135,20 +143,24 @@ namespace Dialogs.ViewModels
         // IDialogAware: вызывается при открытии диалога
         public void OnDialogOpened(IDialogParameters parameters)
         {
-            // Извлекаем обязательные параметры
+            var existingModel = parameters.GetValue<MediaEditModel>("model");
 
-            // Если передали готовую Model — используем её, иначе создаём новую
-            Model = parameters.GetValue<MediaEditModel>("model") ?? new MediaEditModel
+            if (existingModel != null)
             {
-                StartDate = DateTimeOffset.Now
-            };
+                // Отписываемся от старой
+                Model.PropertyChanged -= OnModelPropertyChanged;
 
-            // Подписываемся на изменения свойств модели
-            Model.PropertyChanged += OnModelPropertyChanged;
+                // Присваиваем новую (лучше клонировать, если это редактирование)
+                Model = existingModel;
 
-            // Обновляем видимость сразу после установки Model
+                // Подписываемся на новую
+                Model.PropertyChanged += OnModelPropertyChanged;
+            }
+            // Если null, оставляем ту, что создали в конструкторе
+
             UpdateVisibility();
             UpdateInventoryVisibility();
+            SaveCommand.RaiseCanExecuteChanged();
         }
 
         // IDialogAware: можно ли закрыть диалог?
