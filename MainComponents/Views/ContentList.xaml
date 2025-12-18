@@ -12,8 +12,20 @@
 
     <Grid>
         <!-- Placeholder (Empty) -->
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Visibility="{Binding Items, ElementName=ListRoot, Converter={StaticResource ShowIfEmpty}}">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <!-- По умолчанию скрыт -->
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <!-- Триггер: Если у списка НЕТ элементов -> Показать -->
+                        <!-- Binding element name указывает на ItemsControl ниже -->
+                        <DataTrigger Binding="{Binding HasItems, ElementName=PART_List}" Value="False">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
             <Border Background="#F1F5F9" Width="80" Height="80" CornerRadius="40" Margin="0,0,0,20">
                 <TextBlock Text="∅" FontSize="30" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#94A3B8"/>
             </Border>
@@ -21,19 +33,21 @@
         </StackPanel>
 
         <!-- List -->
-        <ScrollViewer VerticalScrollBarVisibility="Auto" BorderThickness="0" Padding="0,0,20,0"
-                      Visibility="{Binding Items, ElementName=ListRoot, Converter={StaticResource ShowIfNotEmpty}}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" BorderThickness="0" Padding="0,0,20,0">
+            
 
-            <ItemsControl ItemsSource="{Binding Items, ElementName=ListRoot}">
+            <!-- ВАЖНО: Даем имя (x:Name) для привязки триггеров выше -->
+            <ItemsControl x:Name="PART_List" 
+                          ItemsSource="{Binding Items, ElementName=ListRoot}">
+
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" />
+                        <WrapPanel Orientation="Horizontal" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <!-- Передаем команды из ContentList (ListRoot) в ContentCard -->
                         <local:ContentCard Width="300"
                             ViewDetailCommand="{Binding ViewDetailCommand, ElementName=ListRoot}"
                             EditCommand="{Binding EditCommand, ElementName=ListRoot}"

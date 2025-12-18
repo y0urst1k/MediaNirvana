@@ -93,7 +93,8 @@ namespace MainComponents.ViewModels
 
             _eventAggregator.GetEvent<ListsLoadedEvent>().Subscribe(lists =>
             {
-                Lists = lists; // Получаем ссылку на общую коллекцию
+                Lists.Clear();
+                Lists.AddRange(lists); // Получаем ссылку на общую коллекцию
             });
         }
 

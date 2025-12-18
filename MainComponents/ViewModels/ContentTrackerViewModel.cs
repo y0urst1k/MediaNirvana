@@ -133,6 +133,7 @@ namespace MainComponents.ViewModels
             _eventAggregator.GetEvent<MediaAddedEvent>().Subscribe(_ => { UpdateTagsList(); RefreshFilter(); });
             _eventAggregator.GetEvent<ItemUpdatedEvent>().Subscribe(_ => { UpdateTagsList(); RefreshFilter(); });
             _eventAggregator.GetEvent<DeleteMediaRequestedEvent>().Subscribe(_ => RefreshFilter());
+            _eventAggregator.GetEvent<MediaLibraryLoadedEvent>().Subscribe(items => SetSourceItems(items));
         }
 
         // === ИНИЦИАЛИЗАЦИЯ ===
@@ -162,7 +163,11 @@ namespace MainComponents.ViewModels
             FilteredView.Filter = FilterItem;
         }
 
-        private void RefreshFilter() => FilteredView?.Refresh();
+        private void RefreshFilter()
+        {
+            FilteredView?.Refresh();
+            RaisePropertyChanged(nameof(IsListEmpty));
+        }
 
         // === ЛОГИКА ФИЛЬТРАЦИИ ===
         private bool FilterItem(object obj)
@@ -269,5 +274,8 @@ namespace MainComponents.ViewModels
             // Передаем в дочернюю VM
             FiltersVM.AvailableTags = tags;
         }
+
+        public bool IsListEmpty => FilteredView != null && FilteredView.IsEmpty;
+
     }
 }
