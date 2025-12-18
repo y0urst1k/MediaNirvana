@@ -217,6 +217,11 @@ namespace MainComponents.ViewModels
         private void SwitchScreen(string screenName)
         {
             ActiveScreen = screenName;
+            if (screenName == "Lists")
+            {
+                // Посылаем данные "вдогонку", чтобы ListsScreenViewModel их получила, если она только что создалась
+                _eventAggregator.GetEvent<MediaLibraryLoadedEvent>().Publish(MediaCollection);
+            }
         }
 
         private void ShowDetail(MediaEditModel item)
